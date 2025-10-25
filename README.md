@@ -66,28 +66,30 @@ npm run build
 ## プロジェクト構造
 
 ```
-calendar-template/
+google-calendar-template/
 ├── src/
 │   ├── constants/        # セレクタ定義
 │   ├── utils/            # ユーティリティ関数
 │   ├── types/            # 型定義
 │   ├── content/          # Content Script
 │   └── popup/            # Popup UI
+├── docs/                 # ドキュメント
+│   ├── INSTALL_GUIDE.md  # インストール・使用方法
+│   └── PRIVACY_POLICY.md # プライバシーポリシー
 ├── dist/                 # ビルド出力
 ├── icons/                # アイコン
 ├── scripts/              # ビルドスクリプト
 ├── manifest.json         # Chrome拡張のマニフェスト
 ├── package.json
 ├── tsconfig.json
-├── vite.config.ts
-├── README.md             # プロジェクト概要
-└── INSTALL_GUIDE.md      # インストール・使用方法
+└── vite.config.ts
 ```
 
 ## 📚 ドキュメント
 
 - **README.md**: プロジェクト概要と開発状況
-- **INSTALL_GUIDE.md**: インストール手順と使用方法の詳細ガイド
+- **[docs/INSTALL_GUIDE.md](docs/INSTALL_GUIDE.md)**: インストール手順と使用方法の詳細ガイド
+- **[docs/PRIVACY_POLICY.md](docs/PRIVACY_POLICY.md)**: プライバシーポリシー
 - **manifest.json**: Chrome拡張機能の設定
 - **src/constants/selectors.ts**: GoogleカレンダーのDOMセレクタ定義
 
@@ -158,4 +160,4 @@ MIT License - 詳細は[LICENSE](LICENSE)をご覧ください。
 
 本拡張機能は、すべてのデータをローカルに保存し、外部サーバーへの送信は一切行いません。
 
-詳細は[プライバシーポリシー](https://maru0014.github.io/google-calendar-template/PRIVACY_POLICY)をご覧ください。
+詳細は[プライバシーポリシー](https://maru0014.github.io/google-calendar-template/docs/PRIVACY_POLICY)をご覧ください。
