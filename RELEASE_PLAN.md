@@ -144,42 +144,53 @@
 
 ---
 
-### Phase R6: Chrome Web Storeへの公開 🚀
-- [ ] **Developer Dashboardへのアクセス**
-  - [ ] https://chrome.google.com/webstore/devconsole
-  - [ ] Google Developer登録（5ドルの一回払い、未登録の場合）
+### Phase R6: Chrome Web Storeへの公開 🚀 ✅
+- [x] **Developer Dashboardへのアクセス**
+  - [x] https://chrome.google.com/webstore/devconsole
+  - [x] Google Developer登録完了
   
-- [ ] **新しいアイテムの作成**
-  - [ ] ZIPファイルのアップロード
-  - [ ] ストア掲載情報の入力
-  - [ ] スクリーンショットのアップロード
-  - [ ] プライバシーポリシーのURL入力
+- [x] **新しいアイテムの作成**
+  - [x] ZIPファイルのアップロード
+  - [x] ストア掲載情報の入力
+  - [x] スクリーンショット4枚のアップロード
+  - [x] プライバシーポリシーのURL入力
   
-- [ ] **配布設定**
-  - [ ] 公開範囲: 公開（ベータテスト用）
-  - [ ] 地域: 日本
-  - [ ] 価格: 無料
-  - [ ] **ベータ版であることを明記**
+- [x] **プライバシーへの取り組み設定**
+  - [x] 単一用途の説明
+  - [x] storage権限の使用理由
+  - [x] ホスト権限の使用理由
+  - [x] リモートコード不使用の表明
+  - [x] データ使用に関する表明
   
-- [ ] **審査提出**
-  - [ ] すべての必須項目を入力
-  - [ ] 審査に提出
+- [x] **配布設定**
+  - [x] 公開範囲: 公開
+  - [x] 地域: 日本
+  - [x] 価格: 無料
+  
+- [x] **審査提出** 🎉
+  - [x] すべての必須項目を入力
+  - [x] 審査に提出（2025-10-25）
   - [ ] 審査完了を待つ（通常1-3営業日）
 
 ---
 
-### Phase R7: リリース後のフォローアップ 📊
-- [ ] **公開確認**
+### Phase R7: リリース後のフォローアップ 📊 🔄
+- [ ] **審査完了待ち**（現在のステータス）
+  - [x] 審査提出完了（2025-10-25）
+  - [ ] 審査結果待ち（通常1-3営業日）
+  - [ ] メール通知の確認
+  
+- [ ] **公開確認**（審査承認後）
   - [ ] ストアでの掲載を確認
   - [ ] インストールテスト
   - [ ] 評価・レビューの監視
   
-- [ ] **ドキュメント更新**
+- [ ] **ドキュメント更新**（審査承認後）
   - [ ] READMEにストアリンクを追加
   - [ ] GitHubリポジトリにバッジを追加（Stars、License、Version）
   - [ ] インストール方法を「ストアからインストール」に更新
   
-- [ ] **フィードバック収集**
+- [ ] **フィードバック収集**（公開後）
   - [ ] ユーザーレビューの確認
   - [ ] GitHub Issuesでバグレポート受付
   - [ ] 改善要望の収集
@@ -259,20 +270,37 @@ Chrome Web Storeの要件により、以下の権限を使用する場合はプ�
 - Phase R3: Chrome Web Store用資料の準備
 - Phase R4: 最終テスト
 - Phase R5: ビルドと検証
+- Phase R6: Chrome Web Store公開（審査提出完了）
 
-### 次のステップ 🚀
+### 現在のステータス 🔄
 
-**Phase R6: Chrome Web Store公開**（1-2時間）
+**Phase R7: リリース後のフォローアップ - 審査待ち**
 
-準備が完全に整いました！Chrome Web Storeへの公開手順を進めましょう。
+Chrome Web Storeに審査提出が完了しました！（2025-10-25）
 
-#### 必要なもの ✅
-- ✅ ZIPファイル: `google-calendar-template-v0.1.0-beta.zip`（27.5 KB）
-- ✅ スクリーンショット: 4枚（1280x800）
-- ✅ プライバシーポリシーURL: https://maru0014.github.io/google-calendar-template/docs/PRIVACY_POLICY
-- ✅ GitHubリポジトリ: https://github.com/maru0014/google-calendar-template
+#### 審査期間
+- **通常**: 1-3営業日
+- **場合によっては**: 数時間～1週間
 
-次の指示で公開手順を案内します！
+#### 次のアクション
+1. **メール通知を待つ**
+   - 審査結果はメールで通知されます
+   - Developer Dashboardでもステータス確認可能
+
+2. **審査承認後にやること**
+   - READMEにChrome Web Storeリンクを追加
+   - ストアページの確認
+   - ユーザーレビューの監視開始
+
+3. **却下された場合**
+   - 理由を確認
+   - 必要な修正を実施
+   - 再提出
+
+#### リンク
+- Developer Dashboard: https://chrome.google.com/webstore/devconsole
+- GitHubリポジトリ: https://github.com/maru0014/google-calendar-template
+- プライバシーポリシー: https://maru0014.github.io/google-calendar-template/docs/PRIVACY_POLICY
 
 ---
 
