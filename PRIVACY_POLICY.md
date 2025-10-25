@@ -68,7 +68,7 @@ Google Calendar Templates（以下「本拡張機能」）は、Googleカレン�
 
 ### お問い合わせ
 
-本プライバシーポリシーに関するご質問は、[GitHub Issues](https://github.com/YOUR_USERNAME/google-calendar-templates/issues)までお願いします。
+本プライバシーポリシーに関するご質問は、[GitHub Issues](https://github.com/maru0014/google-calendar-template/issues)までお願いします。
 
 ### 変更履歴
 
@@ -140,7 +140,7 @@ You have the following rights:
 
 ### Contact
 
-For questions about this Privacy Policy, please contact us via [GitHub Issues](https://github.com/YOUR_USERNAME/google-calendar-templates/issues).
+For questions about this Privacy Policy, please contact us via [GitHub Issues](https://github.com/maru0014/google-calendar-template/issues).
 
 ### Changes
 

@@ -3,7 +3,7 @@
 Googleカレンダーで予定を作成する際に、事前に保存したテンプレートを適用できるChrome拡張機能。
 
 > **⚠️ ベータ版について**  
-> このバージョンは初期リリース（v0.1.0-beta）です。基本機能は動作していますが、今後のアップデートで機能追加や改善を予定しています。フィードバックやバグレポートは[GitHub Issues](https://github.com/YOUR_USERNAME/google-calendar-templates/issues)までお願いします。
+> このバージョンは初期リリース（v0.1.0-beta）です。基本機能は動作していますが、今後のアップデートで機能追加や改善を予定しています。フィードバックやバグレポートは[GitHub Issues](https://github.com/maru0014/google-calendar-template/issues)までお願いします。
 
 ## ✨ 機能
 
@@ -144,8 +144,8 @@ calendar-template/
 
 バグレポート、機能要望、プルリクエストを歓迎します！
 
-- **バグ報告**: [GitHub Issues](https://github.com/YOUR_USERNAME/google-calendar-templates/issues)
-- **機能要望**: [GitHub Issues](https://github.com/YOUR_USERNAME/google-calendar-templates/issues)
+- **バグ報告**: [GitHub Issues](https://github.com/maru0014/google-calendar-template/issues)
+- **機能要望**: [GitHub Issues](https://github.com/maru0014/google-calendar-template/issues)
 - **プルリクエスト**: [CONTRIBUTING.md](CONTRIBUTING.md)をご確認ください
 
 詳細は[コントリビューションガイド](CONTRIBUTING.md)をご覧ください。
@@ -158,4 +158,4 @@ MIT License - 詳細は[LICENSE](LICENSE)をご覧ください。
 
 本拡張機能は、すべてのデータをローカルに保存し、外部サーバーへの送信は一切行いません。
 
-詳細は[プライバシーポリシー](PRIVACY_POLICY.md)をご覧ください。
+詳細は[プライバシーポリシー](https://maru0014.github.io/google-calendar-template/PRIVACY_POLICY)をご覧ください。
