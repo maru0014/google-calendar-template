@@ -71,4 +71,3 @@ MIT License
 ---
 
 **Google Calendar Template をお楽しみください！** 🎉
-

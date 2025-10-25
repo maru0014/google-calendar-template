@@ -1,13 +1,13 @@
 ---
-description: Google Calendar Templates Chrome拡張機能の開発ルール。TypeScript、Chrome Extensions、Viteを使用したプロジェクトの全体的なコーディング規約とベストプラクティス。
+description: Googleカレンダーテンプレート Chrome拡張機能の開発ルール。TypeScript、Chrome Extensions、Viteを使用したプロジェクトの全体的なコーディング規約とベストプラクティス。
 globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.json", "**/*.md"]
 alwaysRun: true
 ---
 
-# Google Calendar Templates - Project Rules
+# Googleカレンダーテンプレート - Project Rules
 
 ## プロジェクト概要
-このプロジェクトは、Google Calendar で予定テンプレートを作成・管理・適用するための Chrome 拡張機能です。
+このプロジェクトは、Googleカレンダー で予定テンプレートを作成・管理・適用するための Chrome 拡張機能です。
 
 ### 技術スタック
 - TypeScript（strict モード）
