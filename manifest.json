@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Googleカレンダーテンプレート（ベータ版）",
+  "name": "Googleカレンダーテンプレート",
   "version": "0.1.0",
   "description": "予定作成用のテンプレート機能をGoogleカレンダーに追加します",
   "permissions": [
