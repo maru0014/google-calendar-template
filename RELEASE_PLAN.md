@@ -22,8 +22,8 @@
   
 - [x] **GitHub Pages設定（プライバシーポリシー用）**
   - [x] `docs/`フォルダに`PRIVACY_POLICY.md`配置
-  - [ ] GitHub Pagesを有効化（要手動設定）
-  - [x] プライバシーポリシーのURLを設定: https://maru0014.github.io/google-calendar-template/docs/PRIVACY_POLICY
+  - [x] GitHub Pagesを有効化
+  - [x] プライバシーポリシーのURLを確認: https://maru0014.github.io/google-calendar-template/docs/PRIVACY_POLICY
 
 ---
 
