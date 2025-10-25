@@ -1,4 +1,4 @@
-# Google Calendar Templates（ベータ版）
+# Google Calendar Template（ベータ版）
 
 Googleカレンダーで予定を作成する際に、事前に保存したテンプレートを適用できるChrome拡張機能。
 

@@ -6,7 +6,7 @@
 import { loadTemplates, saveTemplates } from '../utils/storage';
 import type { Template } from '../types';
 
-console.log('📋 Google Calendar Templates - Popup Loaded');
+console.log('📋 Google Calendar Template - Popup Loaded');
 
 // DOM要素
 let templateList: HTMLUListElement;

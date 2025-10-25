@@ -8,7 +8,7 @@
 
 ### 概要
 
-Google Calendar Templates（以下「本拡張機能」）は、Googleカレンダーにテンプレート機能を追加するChrome拡張機能です。本プライバシーポリシーは、本拡張機能がどのようにデータを取り扱うかを説明します。
+Google Calendar Template（以下「本拡張機能」）は、Googleカレンダーにテンプレート機能を追加するChrome拡張機能です。本プライバシーポリシーは、本拡張機能がどのようにデータを取り扱うかを説明します。
 
 ### 収集する情報
 
@@ -80,7 +80,7 @@ Google Calendar Templates（以下「本拡張機能」）は、Googleカレン�
 
 ### Overview
 
-Google Calendar Templates (the "Extension") is a Chrome extension that adds template functionality to Google Calendar. This Privacy Policy explains how the Extension handles data.
+Google Calendar Template (the "Extension") is a Chrome extension that adds template functionality to Google Calendar. This Privacy Policy explains how the Extension handles data.
 
 ### Information We Collect
 
@@ -150,4 +150,3 @@ This Privacy Policy may be updated as necessary. Significant changes will be ann
 
 **Version: 1.0**  
 **Effective Date: 2025-10-25**
-

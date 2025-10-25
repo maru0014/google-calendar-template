@@ -1,6 +1,6 @@
 # インストール・使用方法ガイド
 
-Google Calendar Templates 拡張機能のインストールと使用方法を説明します。
+Google Calendar Template 拡張機能のインストールと使用方法を説明します。
 
 ---
 
@@ -161,7 +161,7 @@ npm run build
 3. **コンソールを確認**してください（F12 → Console タブ）
    - 正常に動作している場合、以下のログが表示されます:
      ```
-     📅 Google Calendar Templates - Content Script Loaded
+     📅 Google Calendar Template - Content Script Loaded
      🚀 Initializing Calendar Templates extension...
      👀 Watching for event editors...
      📝 Editor detected: popup (or fullpage)
@@ -230,4 +230,4 @@ A: 現在は「期間」（時間単位）のみ指定可能です。開始時�
 
 ---
 
-**Google Calendar Templates をお楽しみください！** 🎉
+**Google Calendar Template をお楽しみください！** 🎉

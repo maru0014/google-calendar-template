@@ -1,6 +1,6 @@
 # コントリビューションガイド
 
-Google Calendar Templates（ベータ版）へのご協力ありがとうございます！🎉
+Google Calendar Template（ベータ版）へのご協力ありがとうございます！🎉
 
 このドキュメントでは、バグレポート、機能要望、プルリクエストの方法を説明します。
 
@@ -122,8 +122,8 @@ Google Calendar Templates（ベータ版）へのご協力ありがとうござ�
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/YOUR_USERNAME/google-calendar-templates.git
-cd google-calendar-templates
+git clone https://github.com/maru0014/google-calendar-template.git
+cd google-calendar-template
 
 # 依存関係をインストール
 npm install

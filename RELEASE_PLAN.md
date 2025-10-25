@@ -9,7 +9,7 @@
   
 - [ ] **GitHubリポジトリの作成**
   - [ ] GitHubで新規リポジトリ作成
-  - [ ] リポジトリ名: `google-calendar-templates`（推奨）
+  - [ ] リポジトリ名: `google-calendar-template`
   - [ ] 公開設定: Public（Chrome Web Storeの要件に対応）
   - [ ] READMEは既存のものを使用
   - [ ] ライセンス: MIT（既に記載済み）
@@ -130,7 +130,7 @@
   
 - [ ] **ZIPファイルの作成**
   - [ ] `dist/`フォルダを圧縮
-  - [ ] ファイル名: `google-calendar-templates-v0.1.0-beta.zip`
+  - [ ] ファイル名: `google-calendar-template-v0.1.0-beta.zip`
   - [ ] サイズ確認（推奨: 5MB以下）
   
 - [ ] **GitHubリリースの作成**
