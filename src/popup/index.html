@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>テンプレート管理</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 500px;
+      min-height: 500px;
+      max-height: 700px;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #fff;
+    }
+
+    .header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #dadce0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header h1 {
+      font-size: 18px;
+      margin: 0;
+      color: #202124;
+      font-weight: 500;
+    }
+
+    .header button {
+      padding: 8px 16px;
+      background: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .header button:hover {
+      background: #1765cc;
+    }
+
+    .content {
+      padding: 16px 20px;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .template-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .template-item {
+      padding: 12px;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      cursor: move;
+      transition: all 0.2s;
+      gap: 12px;
+    }
+
+    .template-item:hover {
+      background: #f8f9fa;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .template-item.dragging {
+      opacity: 0.5;
+    }
+
+    .template-info {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .template-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #202124;
+      margin-bottom: 4px;
+    }
+
+    .template-preview {
+      font-size: 12px;
+      color: #5f6368;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .template-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+      align-items: flex-start;
+    }
+
+    .template-actions button {
+      padding: 6px 12px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      color: #5f6368;
+    }
+
+    .template-actions button:hover {
+      background: #f8f9fa;
+    }
+
+    .template-actions button.delete {
+      color: #d93025;
+    }
+
+    .template-actions button.delete:hover {
+      background: #fce8e6;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #5f6368;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .empty-state-text {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .empty-state-subtext {
+      font-size: 12px;
+      color: #80868b;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      width: 450px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      color: #202124;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #202124;
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #1a73e8;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    .modal-actions button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .modal-actions button.cancel {
+      background: #f8f9fa;
+      color: #5f6368;
+    }
+
+    .modal-actions button.cancel:hover {
+      background: #e8eaed;
+    }
+
+    .modal-actions button.save {
+      background: #1a73e8;
+      color: white;
+    }
+
+    .modal-actions button.save:hover {
+      background: #1765cc;
+    }
+
+    .drag-handle {
+      color: #80868b;
+      margin-right: 8px;
+      cursor: move;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📅 テンプレート管理</h1>
+    <button id="create-btn">+ 新規作成</button>
+  </div>
+
+  <div class="content">
+    <div id="empty-state" class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <div class="empty-state-text">テンプレートがありません</div>
+      <div class="empty-state-subtext">「新規作成」ボタンから最初のテンプレートを作成しましょう</div>
+    </div>
+
+    <ul id="template-list" class="template-list" style="display: none;"></ul>
+  </div>
+
+  <!-- モーダル -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header" id="modal-title">テンプレートを作成</div>
+
+      <form id="template-form">
+        <div class="form-group">
+          <label for="template-name">テンプレート名 *</label>
+          <input type="text" id="template-name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="template-title">タイトル *</label>
+          <input type="text" id="template-title" required placeholder="例: チームミーティング">
+        </div>
+
+        <div class="form-group">
+          <label for="template-description">説明</label>
+          <textarea id="template-description" placeholder="例: 週次のチーム定例会議"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="template-location">場所</label>
+          <input type="text" id="template-location" placeholder="例: 会議室A">
+        </div>
+
+        <div class="form-group">
+          <label for="template-guests">ゲスト（カンマ区切り）</label>
+          <input type="text" id="template-guests" placeholder="例: user1@example.com, user2@example.com">
+        </div>
+
+        <div class="form-group">
+          <label for="template-duration">期間（分）</label>
+          <input type="number" id="template-duration" min="0" step="1" placeholder="例: 60">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel" id="cancel-btn">キャンセル</button>
+          <button type="submit" class="save">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="./index.ts"></script>
+</body>
+</html>

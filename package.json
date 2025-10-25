@@ -1,0 +1,30 @@
+{
+  "name": "google-calendar-template",
+  "version": "0.1.0",
+  "description": "Googleカレンダーに予定作成用のテンプレート機能を追加するChrome拡張機能（ベータ版）",
+  "type": "module",
+  "homepage": "https://github.com/maru0014/google-calendar-template",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maru0014/google-calendar-template.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maru0014/google-calendar-template/issues"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:content && npm run build:popup && npm run copy:assets",
+    "build:content": "vite build --config vite.config.ts",
+    "build:popup": "vite build --config vite.config.popup.ts",
+    "copy:assets": "node scripts/copy-assets.js",
+    "preview": "vite preview"
+  },
+  "keywords": ["chrome-extension", "calendar", "template"],
+  "author": "marumo",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.1.24",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12"
+  }
+}

@@ -1,0 +1,363 @@
+---
+description: Google Calendar Templates Chrome拡張機能の開発ルール。TypeScript、Chrome Extensions、Viteを使用したプロジェクトの全体的なコーディング規約とベストプラクティス。
+globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.json", "**/*.md"]
+alwaysRun: true
+---
+
+# Google Calendar Templates - Project Rules
+
+## プロジェクト概要
+このプロジェクトは、Google Calendar で予定テンプレートを作成・管理・適用するための Chrome 拡張機能です。
+
+### 技術スタック
+- TypeScript（strict モード）
+- Vite（バンドラー）
+- Chrome Extensions Manifest V3
+- Vanilla JS（UI フレームワークなし）
+
+---
+
+## コーディング規約
+
+### TypeScript
+- **strictモードを維持**: `tsconfig.json` の strict オプションは常に true
+- **型安全性を最優先**: any 型の使用は避け、適切な型定義を行う
+- **null チェック**: オプショナルチェイニング（`?.`）と nullish coalescing（`??`）を活用
+- **型定義の場所**: `src/types/index.ts` に集約
+
+### ファイル命名
+- **snake_case**: プロジェクト全体で snake_case を使用（ユーザーの好み）
+- **TypeScript**: `.ts` 拡張子
+- **定数ファイル**: `src/constants/` 配下に配置
+
+### コードスタイル
+- **関数**: アロー関数を優先（トップレベルは function も可）
+- **非同期処理**: async/await を使用
+- **エラーハンドリング**: try-catch で適切に処理し、コンソールログを出力
+- **ログ出力**: 絵文字プレフィックスを使用（🔵, ✅, ❌, ⚠️ など）
+
+---
+
+## プロジェクト構造
+
+```
+calendar-template/
+├── src/
+│   ├── constants/      # セレクタやエンドポイント等の定数
+│   ├── types/          # TypeScript 型定義
+│   ├── utils/          # ヘルパー関数・ユーティリティ
+│   ├── content/        # Content Script（Google Calendar に挿入）
+│   └── popup/          # Popup UI（拡張機能の設定画面）
+├── dist/               # ビルド出力（.gitignore）
+├── icons/              # 拡張機能アイコン
+├── scripts/            # ビルドスクリプト
+├── manifest.json       # Chrome 拡張機能マニフェスト
+├── package.json
+├── tsconfig.json
+├── vite.config.ts      # Content Script用
+├── vite.config.popup.ts # Popup UI用
+├── README.md           # プロジェクト概要
+└── INSTALL_GUIDE.md    # インストール・使用方法
+```
+
+### 重要なディレクトリ
+- **`src/constants/selectors.ts`**: GoogleカレンダーのCSS セレクタ定義（Phase 0の調査結果を基にしたもの）
+- **`src/utils/`**: 再利用可能な関数群（DOM操作、Storage、変数置換など）
+- **`README.md`**: プロジェクト概要と開発状況
+- **`INSTALL_GUIDE.md`**: 詳細なインストール手順と使用方法
+
+---
+
+## 開発フロー
+
+### Phase 0: 調査・解析（完了）
+Google Calendar の DOM 構造を調査し、セレクタを特定しました。
+調査結果は `src/constants/selectors.ts` に反映されています。
+
+### Phase 1: 基本機能実装（完了）
+- ✅ セレクタを `src/constants/selectors.ts` に定義
+- ✅ ヘルパー関数を `src/utils/` に実装
+- ✅ Content Script と Popup UI を実装
+- ✅ UI配置の最適化
+- ✅ ビルドシステムの構築
+
+### Phase 2: UX改善・実環境テスト（完了）
+- ✅ ポップアップ・フルページ対応（全フィールド）
+- ✅ 期間設定の実装（分単位、React対応、1分刻み）
+- ✅ 時刻の視覚的反映（Enterキーによるトリガー）
+- ✅ UI配置の最適化とz-index調整
+- ✅ テンプレート選択の保持（UX改善）
+- ✅ 重複挿入の防止
+- ✅ 変数置換の動作確認（11種類すべて）
+- ✅ エッジケースのテスト（7項目）
+- ✅ 長文テンプレートのレイアウト対応
+
+---
+
+## セレクタの扱い
+
+### 原則
+- **aria-label を優先**: Google Calendar は多言語対応のため、aria-label が安定
+- **class は避ける**: ランダム生成されるため不安定
+- **複数の検出方法を用意**: フォールバックロジックを実装
+- **定数化**: `src/constants/selectors.ts` に集約し、ハードコードしない
+
+### 例
+```typescript
+// ❌ Bad
+const title = document.querySelector('.XvJf4c input');
+
+// ✅ Good
+const title = document.querySelector(POPUP_SELECTORS.title);
+// with fallback
+if (!title) {
+  console.warn('⚠️ Title field not found');
+  return;
+}
+```
+
+---
+
+## DOM 操作のベストプラクティス
+
+### 1. 要素の取得
+```typescript
+// waitForElement で非同期待機
+const element = await waitForElement(POPUP_SELECTORS.title, 5000);
+if (!element) {
+  console.error('❌ Element not found');
+  return;
+}
+```
+
+### 2. 値の設定
+```typescript
+// setFieldValue でイベント発火も自動実行
+setFieldValue(inputElement as HTMLElement, 'テスト値');
+```
+
+### 3. contenteditable 要素
+```typescript
+// innerText を使用（TrustedHTML 対策）
+descriptionElement.innerText = 'テスト説明';
+// innerHTML は使用不可
+```
+
+### 4. イベント発火順序
+```typescript
+element.focus();
+element.dispatchEvent(new Event('input', { bubbles: true }));
+element.dispatchEvent(new Event('change', { bubbles: true }));
+element.blur();
+```
+
+---
+
+## Chrome Storage API
+
+### テンプレートの保存形式
+```typescript
+{
+  templates: [
+    {
+      id: string,           // UUID
+      name: string,         // テンプレート名
+      title: string,        // イベントタイトル
+      description?: string, // 説明
+      location?: string,    // 場所
+      guests?: string[],    // ゲスト
+      duration?: number,    // 期間（分）
+      allDay?: boolean,     // 終日
+      guestPermissions?: {
+        modify: boolean,
+        inviteOthers: boolean,
+        seeGuestList: boolean
+      },
+      order: number,        // 並び順
+      createdAt: string,    // 作成日時
+      updatedAt: string     // 更新日時
+    }
+  ]
+}
+```
+
+### 使用例
+```typescript
+import { loadTemplates, saveTemplate } from '../utils/storage';
+
+const templates = await loadTemplates();
+await saveTemplate(newTemplate);
+```
+
+---
+
+## 変数システム
+
+### 対応変数
+- `{{date}}` - 2025-10-24
+- `{{date_jp}}` - 2025年10月24日
+- `{{date_calendar}}` - 2025年 10月 24日
+- `{{time}}` - 20:15
+- `{{datetime}}` - 2025/10/24 20:15:34
+- `{{day_of_week}}` - 金曜日
+- `{{year}}`, `{{month}}`, `{{day}}`
+- `{{user_email}}` - ユーザーのメールアドレス
+- `{{user_name}}` - ユーザー名
+
+### 実装
+```typescript
+import { replaceVariables } from '../utils/variables';
+
+const processedTitle = await replaceVariables(template.title);
+```
+
+---
+
+## ビルドシステム
+
+### ビルドコマンド
+```bash
+npm run build          # 全体ビルド
+npm run build:content  # Content Script のみ
+npm run build:popup    # Popup UI のみ
+npm run copy:assets    # アセットコピー
+```
+
+### Vite 設定
+- **Content Script**: IIFE 形式（`vite.config.ts`）
+  - Chrome の content_scripts は ES Module 非対応
+  - `format: 'iife'` で単一ファイルにバンドル
+- **Popup**: ES Module 形式（`vite.config.popup.ts`）
+  - Popup は ES Module 対応
+  - `format: 'es'` で出力
+
+---
+
+## UI/UX ガイドライン
+
+### Google Calendar との調和
+- **Material Design** に準拠
+- **フォント**: 'Google Sans', Roboto, Arial, sans-serif
+- **カラー**: Google Calendar の配色に合わせる
+  - プライマリ: #1a73e8
+  - ボーダー: #dadce0
+  - テキスト: #3c4043, #5f6368
+- **アニメーション**: 控えめで自然な動き
+
+### テンプレート選択 UI
+- **ポップアップ**: 背景透過、横余白なし
+- **フルページ**: 左64px余白（アイコンスペース）
+- **配置**: タイトルフィールドのすぐ下、またはタブのすぐ下
+- **イベント伝播**: stopPropagation() で制御
+
+---
+
+## デバッグ
+
+### コンソールログ
+- 必ず絵文字プレフィックスを使用
+- 重要度に応じて色を変える
+  ```typescript
+  console.log('🔵 [Info] Normal log');
+  console.log('✅ [Success] Operation completed');
+  console.warn('⚠️ [Warning] Something might be wrong');
+  console.error('❌ [Error] Failed to execute');
+  console.log('📍 [Position] Injection point');
+  console.log('🔍 [Search] Searching for element');
+  ```
+
+### Chrome DevTools
+- **Elements パネル**: DOM 構造の確認
+- **Console**: リアルタイムデバッグ
+- **Sources**: ブレークポイント設定
+- **Network**: API 通信の監視（今後の機能拡張時）
+
+---
+
+## よくある問題と解決策
+
+### 1. セレクタが見つからない
+- Google Calendar の言語設定を確認（日本語前提）
+- DOM が読み込まれるまで待機（`waitForElement`）
+- フォールバックロジックを実装
+
+### 2. 値が設定されない
+- イベント発火順序を確認（focus → input → change → blur）
+- contenteditable の場合は innerText を使用
+- React の制御を考慮（Google Calendar は React 使用）
+
+### 3. UI が表示されない
+- 既に挿入済みか確認（`document.getElementById`）
+- 挿入位置が正しいか確認（コンソールログ）
+- z-index やスタイルの競合を確認
+
+### 4. ビルドエラー
+- TypeScript の型エラーを優先的に解決
+- `npm run build:content` と `build:popup` を個別実行
+- `dist/` フォルダをクリーンアップ
+
+---
+
+## Git / GitHub
+
+### コミットメッセージ
+日本語で記述（ユーザーの好み）
+
+例:
+```
+✨ テンプレート選択UIの配置を最適化
+🐛 ポップアップでの値設定バグを修正
+📝 README を更新
+🚀 Phase 1 完了
+```
+
+### ブランチ戦略
+- `main`: 安定版
+- `develop`: 開発版
+- `feature/*`: 機能追加
+- `bugfix/*`: バグ修正
+
+---
+
+## 今後の拡張
+
+### Phase 2
+- 実環境での統合テスト
+- バグ修正と UI/UX 改善
+- エッジケースの対応
+
+### Phase 3（将来的な機能）
+- テンプレートのインポート/エクスポート
+- デフォルトテンプレート
+- 多言語対応（英語）
+- ショートカットキー
+- カテゴリ分類
+- 検索機能
+
+---
+
+## 参考資料
+
+### プロジェクトドキュメント
+- `README.md` - プロジェクト概要と開発状況
+- `INSTALL_GUIDE.md` - インストール手順と使用方法の詳細ガイド
+- `src/constants/selectors.ts` - GoogleカレンダーのDOMセレクタ定義
+
+### 外部リソース
+- [Chrome Extensions Documentation](https://developer.chrome.com/docs/extensions/mv3/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
+- [Vite Documentation](https://vitejs.dev/)
+- [Material Design](https://material.io/design)
+
+---
+
+## 連絡先・質問
+
+質問や問題が発生した場合は、以下を確認：
+1. このProject Rule
+2. `README.md` のプロジェクト概要
+3. `INSTALL_GUIDE.md` のトラブルシューティング
+4. `src/constants/selectors.ts` のセレクタ定義
+5. コンソールログの出力
+
+それでも解決しない場合は、開発者（ユーザー）に相談してください。

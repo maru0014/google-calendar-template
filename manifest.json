@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Googleカレンダーテンプレート（ベータ版）",
+  "version": "0.1.0",
+  "description": "予定作成用のテンプレート機能をGoogleカレンダーに追加します",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://calendar.google.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://calendar.google.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["https://calendar.google.com/*"]
+    }
+  ]
+}
