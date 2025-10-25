@@ -13,6 +13,11 @@ export default defineConfig({
         assetFileNames: '[name].[ext]',
       },
     },
+    minify: 'esbuild',
+  },
+  esbuild: {
+    // 本番ビルドでconsole.logを削除
+    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
   },
   resolve: {
     alias: {
