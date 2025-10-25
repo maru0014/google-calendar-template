@@ -27,10 +27,10 @@ Googleカレンダーに予定作成用のテンプレート機能を追加す�
 
 ## 📦 インストール方法
 
-### Chrome Web Store（審査中）
-審査完了後、Chrome Web Storeから直接インストール可能になります。
+### Chrome Web Store（推奨）
+[Chrome Web Storeからインストール](https://chromewebstore.google.com/detail/gmgfladmnifefmoggfhgmdkdoelbmeec)
 
-### 開発者モード（現在利用可能）
+### 開発者モード
 1. [リリースページ](https://github.com/maru0014/google-calendar-template/releases/tag/v0.1.0-beta)から `google-calendar-template-v0.1.0-beta.zip` をダウンロード
 2. ZIPファイルを解凍
 3. Chromeの拡張機能ページ（`chrome://extensions/`）を開く

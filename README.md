@@ -2,8 +2,17 @@
 
 Googleカレンダーで予定を作成する際に、事前に保存したテンプレートを適用できるChrome拡張機能。
 
-> **⚠️ ベータ版について**  
-> このバージョンは初期リリース（v0.1.0-beta）です。基本機能は動作していますが、今後のアップデートで機能追加や改善を予定しています。フィードバックやバグレポートは[GitHub Issues](https://github.com/maru0014/google-calendar-template/issues)までお願いします。
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Available-brightgreen)](https://chromewebstore.google.com/detail/gmgfladmnifefmoggfhgmdkdoelbmeec)
+[![Version](https://img.shields.io/badge/version-0.1.1-blue)](https://github.com/maru0014/google-calendar-template/releases)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+## 📦 インストール
+
+### Chrome Web Store（推奨）
+[Chrome Web Storeからインストール](https://chromewebstore.google.com/detail/gmgfladmnifefmoggfhgmdkdoelbmeec)
+
+### 開発者モード
+詳細は[インストールガイド](docs/INSTALL_GUIDE.md)をご覧ください。
 
 ## ✨ 機能
 

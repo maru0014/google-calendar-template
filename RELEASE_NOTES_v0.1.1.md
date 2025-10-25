@@ -20,7 +20,9 @@ Googleカレンダーテンプレート拡張機能の v0.1.1 リリースです
 ## 📦 インストール方法
 
 ### Chrome Web Store（推奨）
-準備中
+[Chrome Web Storeからインストール](https://chromewebstore.google.com/detail/gmgfladmnifefmoggfhgmdkdoelbmeec)
+
+既にインストール済みの場合、自動的にv0.1.1に更新されます。
 
 ### 開発者モード
 1. [リリースページ](https://github.com/maru0014/google-calendar-template/releases/tag/v0.1.1)から `google-calendar-template-v0.1.1.zip` をダウンロード
@@ -50,4 +52,3 @@ Googleカレンダーテンプレート拡張機能の v0.1.1 リリースです
 ---
 
 **Google Calendar Template をお楽しみください！** 🎉
-

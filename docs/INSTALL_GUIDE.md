@@ -6,20 +6,33 @@ Google Calendar Template 拡張機能のインストールと使用方法を説�
 
 ## 📦 インストール手順
 
-### 1. リポジトリのクローン（または ZIP ダウンロード）
+### 方法1: Chrome Web Store（推奨）
+
+最も簡単な方法です。
+
+1. [Chrome Web Store](https://chromewebstore.google.com/detail/gmgfladmnifefmoggfhgmdkdoelbmeec)にアクセス
+2. 「Chromeに追加」ボタンをクリック
+3. 確認ダイアログで「拡張機能を追加」をクリック
+4. ツールバーにアイコンが表示されます
+
+### 方法2: 開発者モード（開発者向け）
+
+ソースコードから直接インストールする方法です。
+
+#### 1. リポジトリのクローン（または ZIP ダウンロード）
 
 ```bash
-git clone <repository-url>
-cd calendar-template
+git clone https://github.com/maru0014/google-calendar-template.git
+cd google-calendar-template
 ```
 
-### 2. 依存関係のインストール
+#### 2. 依存関係のインストール
 
 ```bash
 npm install
 ```
 
-### 3. ビルド
+#### 3. ビルド
 
 ```bash
 npm run build
@@ -27,7 +40,7 @@ npm run build
 
 ビルドが成功すると、`dist/` フォルダが作成されます。
 
-### 4. Chrome に拡張機能を読み込む
+#### 4. Chrome に拡張機能を読み込む
 
 1. Chrome を開き、アドレスバーに `chrome://extensions/` と入力
 2. 右上の「デベロッパーモード」をONにする
