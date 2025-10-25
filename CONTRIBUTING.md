@@ -210,6 +210,83 @@ feat(template): カテゴリ機能を追加
 
 ---
 
+## 📦 リリースプロセス（メンテナー向け）
+
+新しいバージョンをリリースする手順です。
+
+### 1. バージョン更新
+
+```bash
+# package.json と manifest.json のバージョンを更新
+# 例: 0.1.0 → 0.1.1
+```
+
+### 2. CHANGELOG.md の更新
+
+```markdown
+## [0.1.1] - YYYY-MM-DD
+
+### 🐛 バグ修正
+- 修正内容を記載
+```
+
+### 3. リリースノートの作成
+
+`RELEASE_NOTES_vX.X.X.md` を作成し、リリース内容を記載
+
+### 4. ビルド
+
+```bash
+npm run build
+```
+
+### 5. ZIPファイルの作成
+
+```bash
+Compress-Archive -Path "dist\*" -DestinationPath "google-calendar-template-vX.X.X.zip" -Force
+```
+
+### 6. Git操作
+
+```bash
+# 変更をコミット
+git add .
+git commit -m "Release vX.X.X: 変更内容のサマリー"
+
+# タグを作成
+git tag -a vX.X.X -m "vX.X.X - 変更内容のサマリー"
+
+# プッシュ
+git push origin main
+git push origin vX.X.X
+```
+
+### 7. GitHub Release の作成
+
+```bash
+# gh コマンドを使用（推奨）
+gh release create vX.X.X google-calendar-template-vX.X.X.zip \
+  --title "vX.X.X - タイトル" \
+  --notes-file RELEASE_NOTES_vX.X.X.md
+```
+
+または、GitHub上で手動作成：
+1. [Releases](https://github.com/maru0014/google-calendar-template/releases)へアクセス
+2. 「Draft a new release」をクリック
+3. タグを選択、タイトルと説明を入力
+4. ZIPファイルを添付
+5. 「Publish release」をクリック
+
+### 8. Chrome Web Store への更新
+
+1. [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)にアクセス
+2. 拡張機能を選択
+3. 「パッケージ」タブで新しいZIPファイルをアップロード
+4. 変更内容を記載
+5. 「レビューのために送信」をクリック
+
+---
+
 ## ❓ 質問
 
 質問がある場合は、[GitHub Discussions](../../discussions)または[Issues](../../issues)でお気軽に聞いてください！
