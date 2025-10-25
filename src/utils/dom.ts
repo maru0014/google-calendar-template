@@ -188,16 +188,18 @@ export function waitForElementRemoved(
 
 /**
  * 入力フィールドのドロップダウン/サジェストを閉じる
- * Escapeキーとblur()を使用
+ * Enterキーとblur()を使用
+ *
+ * 注意: Escapeキーは親要素に伝播して画面を閉じようとするため使用しない
  */
 export function closeFieldDropdown(element: HTMLElement): void {
   try {
-    // Escapeキーを送信してドロップダウンを閉じる
+    // Enterキーを送信してドロップダウンを閉じる
     element.dispatchEvent(
       new KeyboardEvent('keydown', {
-        key: 'Escape',
-        code: 'Escape',
-        keyCode: 27,
+        key: 'Enter',
+        code: 'Enter',
+        keyCode: 13,
         bubbles: true,
       })
     );

@@ -1,6 +1,6 @@
 {
   "name": "google-calendar-template",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Googleカレンダーに予定作成用のテンプレート機能を追加するChrome拡張機能",
   "type": "module",
   "homepage": "https://github.com/maru0014/google-calendar-template",

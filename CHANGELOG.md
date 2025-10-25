@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2025-10-25
+
+### 🐛 バグ修正
+- ゲスト設定時に「保存されていない変更を破棄しますか？」ダイアログが表示される問題を修正
+  - `closeFieldDropdown()`関数で使用していたEscapeキーがイベント作成画面を閉じようとしていた
+  - EscapeキーをEnterキーに変更し、ダイアログが表示されないように修正
+
 ## [0.1.0-beta] - 2025-10-25
 
 ### ✨ 追加機能
