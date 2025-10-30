@@ -3,7 +3,7 @@
  * テンプレート管理画面
  */
 
-import { loadTemplates, saveTemplates } from '../utils/storage';
+import { loadTemplates, saveTemplates, exportData, importData } from '../utils/storage';
 import type { Template } from '../types';
 
 console.log('📋 Google Calendar Template - Popup Loaded');
@@ -16,6 +16,9 @@ let modalTitle: HTMLDivElement;
 let templateForm: HTMLFormElement;
 let createBtn: HTMLButtonElement;
 let cancelBtn: HTMLButtonElement;
+let exportBtn: HTMLButtonElement;
+let importBtn: HTMLButtonElement;
+let importFileInput: HTMLInputElement;
 
 // 現在編集中のテンプレートID
 let editingTemplateId: string | null = null;
@@ -272,11 +275,17 @@ async function init(): Promise<void> {
   templateForm = document.getElementById('template-form') as HTMLFormElement;
   createBtn = document.getElementById('create-btn') as HTMLButtonElement;
   cancelBtn = document.getElementById('cancel-btn') as HTMLButtonElement;
+  exportBtn = document.getElementById('export-btn') as HTMLButtonElement;
+  importBtn = document.getElementById('import-btn') as HTMLButtonElement;
+  importFileInput = document.getElementById('import-file') as HTMLInputElement;
 
   // イベントリスナー
   createBtn.addEventListener('click', openCreateModal);
   cancelBtn.addEventListener('click', closeModal);
   templateForm.addEventListener('submit', saveTemplate);
+  exportBtn.addEventListener('click', handleExportClick);
+  importBtn.addEventListener('click', () => importFileInput.click());
+  importFileInput.addEventListener('change', handleImportFile);
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
       closeModal();
@@ -298,3 +307,60 @@ if (document.readyState === 'loading') {
 }
 
 export {};
+
+/**
+ * エクスポート処理
+ */
+async function handleExportClick(): Promise<void> {
+  try {
+    const json = await exportData();
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    const ts = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const fileName = `calendar-templates-${ts.getFullYear()}${pad(ts.getMonth() + 1)}${pad(ts.getDate())}-${pad(ts.getHours())}${pad(ts.getMinutes())}${pad(ts.getSeconds())}.json`;
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to export:', error);
+    alert('エクスポートに失敗しました。');
+  }
+}
+
+/**
+ * インポート処理
+ */
+async function handleImportFile(e: Event): Promise<void> {
+  const input = e.target as HTMLInputElement;
+  const file = input.files && input.files[0];
+  if (!file) return;
+
+  try {
+    if (file.size > 1024 * 1024) {
+      alert('ファイルサイズが大きすぎます（最大1MB）');
+      input.value = '';
+      return;
+    }
+
+    const text = await file.text();
+
+    // インポート
+    const ok = await importData(text);
+    if (ok) {
+      templates = await loadTemplates();
+      renderTemplates();
+      alert('インポートが完了しました。');
+    }
+  } catch (error) {
+    console.error('Failed to import:', error);
+    alert('インポートに失敗しました。ファイルの内容をご確認ください。');
+  } finally {
+    input.value = '';
+  }
+}
