@@ -350,6 +350,15 @@ async function handleImportFile(e: Event): Promise<void> {
 
     const text = await file.text();
 
+    // 解析段階のエラーを明示
+    try {
+      JSON.parse(text);
+    } catch (syntaxErr) {
+      alert('JSONの解析に失敗しました（ファイルが壊れている可能性があります）');
+      input.value = '';
+      return;
+    }
+
     // インポート
     const ok = await importData(text);
     if (ok) {
@@ -359,7 +368,14 @@ async function handleImportFile(e: Event): Promise<void> {
     }
   } catch (error) {
     console.error('Failed to import:', error);
-    alert('インポートに失敗しました。ファイルの内容をご確認ください。');
+    const message = (error as Error)?.message || '';
+    if (message.includes('Invalid data format')) {
+      alert('インポートに失敗しました（データ形式が不正です）。');
+    } else if (message.includes('Invalid template')) {
+      alert('インポートに失敗しました（必須項目が不足しています: name/title）。');
+    } else {
+      alert('インポートに失敗しました。ファイルの内容をご確認ください。');
+    }
   } finally {
     input.value = '';
   }

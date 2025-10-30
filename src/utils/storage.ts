@@ -33,6 +33,7 @@ const STORAGE_KEYS = {
   TEMPLATES: 'templates',
   SELECTED_TEMPLATE_ID: 'selectedTemplateId',
   BACKUP_TEMPLATES: 'templates_backup',
+  BACKUP_TEMPLATES_HISTORY: 'templates_backups',
 } as const;
 
 /**
@@ -275,11 +276,23 @@ export async function importData(jsonString: string): Promise<boolean> {
     const existing = await getTemplates();
     // サイレントバックアップ（ダウンロードしない）
     try {
+      // 互換: 単一バックアップを維持
       await chrome.storage.local.set({
         [STORAGE_KEYS.BACKUP_TEMPLATES]: {
           templates: existing,
           backedUpAt: now,
         },
+      });
+      // 新: 直近3件のローテーション
+      const historyGet = await chrome.storage.local.get(
+        STORAGE_KEYS.BACKUP_TEMPLATES_HISTORY
+      );
+      const history: { templates: Template[]; backedUpAt: number }[] =
+        historyGet[STORAGE_KEYS.BACKUP_TEMPLATES_HISTORY] || [];
+      history.push({ templates: existing, backedUpAt: now });
+      const rotated = history.slice(-3);
+      await chrome.storage.local.set({
+        [STORAGE_KEYS.BACKUP_TEMPLATES_HISTORY]: rotated,
       });
     } catch (e) {
       console.warn('Failed to save silent backup:', e);
@@ -337,10 +350,12 @@ export async function importData(jsonString: string): Promise<boolean> {
     });
 
     // マージ（既存 + インポート）し、orderを振り直し
-    const merged: Template[] = [...existing, ...normalized].map((t, index) => ({
+    // updatedAt は既存は維持、新規/インポート元が未設定なら now
+    const mergedSource: Template[] = [...existing, ...normalized];
+    const merged: Template[] = mergedSource.map((t, index) => ({
       ...t,
       order: index,
-      updatedAt: now,
+      updatedAt: typeof t.updatedAt === 'number' ? t.updatedAt : now,
     }));
 
     await chrome.storage.local.set({ [STORAGE_KEYS.TEMPLATES]: merged });
