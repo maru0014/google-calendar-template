@@ -32,6 +32,8 @@ export interface Template {
 const STORAGE_KEYS = {
   TEMPLATES: 'templates',
   SELECTED_TEMPLATE_ID: 'selectedTemplateId',
+  BACKUP_TEMPLATES: 'templates_backup',
+  BACKUP_TEMPLATES_HISTORY: 'templates_backups',
 } as const;
 
 /**
@@ -251,7 +253,8 @@ function generateId(): string {
 export async function exportData(): Promise<string> {
   try {
     const templates = await getTemplates();
-    return JSON.stringify(templates, null, 2);
+    const sorted = [...templates].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    return JSON.stringify(sorted, null, 2);
   } catch (error) {
     console.error('Failed to export data:', error);
     throw error;
@@ -263,18 +266,118 @@ export async function exportData(): Promise<string> {
  */
 export async function importData(jsonString: string): Promise<boolean> {
   try {
-    const templates: Template[] = JSON.parse(jsonString);
+    const parsed = JSON.parse(jsonString);
 
-    // バリデーション
-    if (!Array.isArray(templates)) {
-      throw new Error('Invalid data format');
+    if (!Array.isArray(parsed)) {
+      throw new Error('Invalid data format: expected an array');
     }
 
-    await chrome.storage.local.set({ [STORAGE_KEYS.TEMPLATES]: templates });
+    const now = Date.now();
+    const existing = await getTemplates();
+    // サイレントバックアップ（ダウンロードしない）
+    try {
+      // 互換: 単一バックアップを維持
+      await chrome.storage.local.set({
+        [STORAGE_KEYS.BACKUP_TEMPLATES]: {
+          templates: existing,
+          backedUpAt: now,
+        },
+      });
+      // 新: 直近3件のローテーション
+      const historyGet = await chrome.storage.local.get(
+        STORAGE_KEYS.BACKUP_TEMPLATES_HISTORY
+      );
+      const history: { templates: Template[]; backedUpAt: number }[] =
+        historyGet[STORAGE_KEYS.BACKUP_TEMPLATES_HISTORY] || [];
+      history.push({ templates: existing, backedUpAt: now });
+      const rotated = history.slice(-3);
+      await chrome.storage.local.set({
+        [STORAGE_KEYS.BACKUP_TEMPLATES_HISTORY]: rotated,
+      });
+    } catch (e) {
+      console.warn('Failed to save silent backup:', e);
+    }
+    const existingIds = new Set(existing.map((t) => t.id));
 
+    const normalized: Template[] = parsed.map((item: any, idx: number) => {
+      const normalizedGuests: string[] | undefined = Array.isArray(item?.guests)
+        ? item.guests.filter((g: any) => typeof g === 'string')
+        : undefined;
+
+      let id: string = typeof item?.id === 'string' && item.id.trim() ? item.id : generateId();
+      if (existingIds.has(id)) {
+        id = generateId();
+      }
+
+      const name: string = typeof item?.name === 'string' ? item.name : '';
+      const title: string = typeof item?.title === 'string' ? item.title : '';
+      const description: string = typeof item?.description === 'string' ? item.description : '';
+      const location: string | undefined = typeof item?.location === 'string' && item.location.trim() ? item.location : undefined;
+      const duration: number | undefined = typeof item?.duration === 'number' && isFinite(item.duration) && item.duration >= 0
+        ? Math.floor(item.duration)
+        : undefined;
+
+      if (!name || !title) {
+        throw new Error('Invalid template: name and title are required');
+      }
+
+      const createdAt: number = typeof item?.createdAt === 'number' ? item.createdAt : now;
+      const updatedAt: number = typeof item?.updatedAt === 'number' ? item.updatedAt : now;
+
+      return {
+        id,
+        name,
+        title,
+        description,
+        location,
+        guests: normalizedGuests,
+        duration,
+        allDay: typeof item?.allDay === 'boolean' ? item.allDay : undefined,
+        visibility: item?.visibility === 'default' || item?.visibility === 'public' || item?.visibility === 'private'
+          ? item.visibility
+          : undefined,
+        guestPermissions: typeof item?.guestPermissions === 'object' && item?.guestPermissions
+          ? {
+              canModify: typeof item.guestPermissions.canModify === 'boolean' ? item.guestPermissions.canModify : undefined,
+              canInviteOthers: typeof item.guestPermissions.canInviteOthers === 'boolean' ? item.guestPermissions.canInviteOthers : undefined,
+              seeGuestList: typeof item.guestPermissions.seeGuestList === 'boolean' ? item.guestPermissions.seeGuestList : undefined,
+            }
+          : undefined,
+        order: idx,
+        createdAt,
+        updatedAt,
+      } as Template;
+    });
+
+    // マージ（既存 + インポート）し、orderを振り直し
+    // updatedAt は既存は維持、新規/インポート元が未設定なら now
+    const mergedSource: Template[] = [...existing, ...normalized];
+    const merged: Template[] = mergedSource.map((t, index) => ({
+      ...t,
+      order: index,
+      updatedAt: typeof t.updatedAt === 'number' ? t.updatedAt : now,
+    }));
+
+    await chrome.storage.local.set({ [STORAGE_KEYS.TEMPLATES]: merged });
     return true;
   } catch (error) {
     console.error('Failed to import data:', error);
     throw error;
+  }
+}
+
+/**
+ * 直近バックアップを取得（存在しない場合は null）
+ */
+export async function getLastBackup(): Promise<{
+  templates: Template[];
+  backedUpAt: number;
+} | null> {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEYS.BACKUP_TEMPLATES);
+    return result[STORAGE_KEYS.BACKUP_TEMPLATES] || null;
+  } catch (error) {
+    console.error('Failed to get last backup:', error);
+    return null;
   }
 }

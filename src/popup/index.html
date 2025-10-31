@@ -263,12 +263,77 @@
       margin-right: 8px;
       cursor: move;
     }
+
+    /* アイコンボタン（ヘッダー用） */
+    .header .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .header .icon-btn {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      background: #fff;
+      color: #5f6368;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .header .icon-btn:hover {
+      background: #f8f9fa;
+      border-color: #c7c9cc;
+    }
+    .header .icon-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+    /* プライマリ（新規作成） */
+    .header .icon-btn.primary {
+      background: #0b57d0;
+      border-color: #0b57d0;
+      color: #fff;
+    }
+    .header .icon-btn.primary:hover {
+      background: #0a49b7;
+      border-color: #0a49b7;
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>📅 テンプレート管理</h1>
-    <button id="create-btn">+ 新規作成</button>
+    <div class="actions icons-only">
+      <button id="export-btn" class="icon-btn" aria-label="エクスポート" title="エクスポート">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <!-- box -->
+          <path d="M4 10v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- arrow up (export) -->
+          <path d="M12 3v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 7l4-4 4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button id="import-btn" class="icon-btn" aria-label="インポート" title="インポート">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <!-- box -->
+          <path d="M4 10v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- arrow down (import) -->
+          <path d="M12 3v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M16 8l-4 4-4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button id="create-btn" class="icon-btn primary" aria-label="新規作成" title="新規作成">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/>
+        </svg>
+      </button>
+      <input type="file" id="import-file" accept="application/json,.json" style="display:none" />
+    </div>
   </div>
 
   <div class="content">
