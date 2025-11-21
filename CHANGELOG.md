@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2025-11-21
+
+### 🐛 バグ修正
+- AM/PM（12時間表記）環境で時間の計算が正しく行われない問題を修正 ([#2](https://github.com/maru0014/google-calendar-template/issues/2))
+  - 時刻解析ロジックを改善し、AM/PM表記や日本語表記（午前/午後）に対応
+  - ポップアップおよびフルスクリーン画面でのテンプレート適用時に正しい終了時刻が設定されるように修正
+
 ## [0.1.1] - 2025-10-25
 
 ### 🐛 バグ修正
