@@ -186,6 +186,8 @@ async function applyToFullPage(
   }
 }
 
+import { parseTime } from './time';
+
 /**
  * 時間数から終了時間を設定（フルページ用）
  */
@@ -207,8 +209,16 @@ async function setDuration(
 
   try {
     // 現在の開始時刻を取得
-    const startTime = startTimeElement.value || '09:00';
-    const [hours, mins] = startTime.split(':').map(Number);
+    const startTimeStr = startTimeElement.value || '09:00';
+    const startTime = parseTime(startTimeStr);
+
+    if (!startTime) {
+      console.error(`Failed to parse start time: ${startTimeStr}`);
+      results.push({ field: 'duration', success: false });
+      return;
+    }
+
+    const { hours, minutes: mins } = startTime;
 
     // 終了時刻を計算（minutesは分数）
     const startMinutes = hours * 60 + mins;
@@ -217,6 +227,16 @@ async function setDuration(
     const endMins = endMinutes % 60;
 
     // 終了時刻を設定
+    // Note: Google Calendar usually expects 24h format for value setting,
+    // even if display is 12h. But we should check if we need to format it back to AM/PM
+    // based on the input format. However, usually setting value in 24h format works for input[type="text"]
+    // or specific calendar inputs.
+    // Let's stick to 24h format for now as it's safer for calculation,
+    // but if the UI requires AM/PM we might need `formatTime` helper.
+    // Given the issue is about *calculation* failing because of parsing,
+    // fixing parsing is the first step.
+    // The original code set it as HH:mm (24h).
+
     const endTimeValue = `${String(endHours).padStart(2, '0')}:${String(
       endMins
     ).padStart(2, '0')}`;
@@ -291,8 +311,16 @@ async function setDurationForPopup(
 
   try {
     // 現在の開始時刻を取得
-    const startTime = startTimeElement.value || '09:00';
-    const [hours, mins] = startTime.split(':').map(Number);
+    const startTimeStr = startTimeElement.value || '09:00';
+    const startTime = parseTime(startTimeStr);
+
+    if (!startTime) {
+      console.error(`Failed to parse start time: ${startTimeStr}`);
+      results.push({ field: 'duration', success: false });
+      return;
+    }
+
+    const { hours, minutes: mins } = startTime;
 
     // 終了時刻を計算（minutesは分数）
     const startMinutes = hours * 60 + mins;
