@@ -6,7 +6,7 @@
 import { Template } from './storage';
 import { replaceVariables } from './variables';
 import { setFieldValue, addGuest, detectCurrentView, getElement, closeFieldDropdown } from './dom';
-import { POPUP_SELECTORS, FULLPAGE_SELECTORS } from '../constants/selectors';
+import { POPUP_SELECTORS, FULLPAGE_SELECTORS, CALENDAR_SELECTORS } from '../constants/selectors';
 import type { ApplyResult, FieldSetResult } from '../types';
 
 /**
@@ -81,11 +81,6 @@ async function applyToPopup(
     }
   }
 
-  // 時間数（終了時間を計算）
-  if (template.duration) {
-    await setDurationForPopup(template.duration, results);
-  }
-
   // ゲスト
   if (template.guests && template.guests.length > 0) {
     const guestElement = getElement<HTMLInputElement>(
@@ -111,6 +106,18 @@ async function applyToPopup(
       const success = setFieldValue(allDayElement, template.allDay);
       results.push({ field: 'allDay', success });
     }
+  }
+
+  // 登録先カレンダー（durationの前に実行 — カレンダー切替でUIリフレッシュされうるため）
+  if (template.calendarName) {
+    const success = await selectCalendar(template.calendarName, 'popup');
+    results.push({ field: 'calendarName', success });
+    await delay(300);
+  }
+
+  // 時間数（終了時間を計算）- 最後に実行
+  if (template.duration) {
+    await setDurationForPopup(template.duration, results);
   }
 }
 
@@ -177,6 +184,13 @@ async function applyToFullPage(
   // ゲストの権限
   if (template.guestPermissions) {
     await applyGuestPermissions(template.guestPermissions, results);
+  }
+
+  // 登録先カレンダー
+  if (template.calendarName) {
+    const success = await selectCalendar(template.calendarName, 'fullpage');
+    results.push({ field: 'calendarName', success });
+    await delay(300);
   }
 
   // 時間数（終了時間を計算）- 最後に実行
@@ -417,4 +431,116 @@ async function applyGuestPermissions(
  */
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * 登録先カレンダーを切り替える
+ * @param calendarName 選択するカレンダー名
+ * @param viewType 現在の画面タイプ（popup / fullpage）
+ */
+async function selectCalendar(
+  calendarName: string,
+  viewType: 'popup' | 'fullpage'
+): Promise<boolean> {
+  console.log(`🔍 登録先カレンダーを切り替えます: ${calendarName} (view: ${viewType})`);
+
+  const triggerSelectors = CALENDAR_SELECTORS.triggers[viewType];
+
+  // 1. すでにカレンダーリストのDOMが表示されているか確認
+  let listbox: Element | null = null;
+  for (const selector of CALENDAR_SELECTORS.list) {
+    listbox = document.querySelector(selector);
+    if (listbox) {
+      console.log(`🎯 表示済みのリストが見つかりました: ${selector}`);
+      break;
+    }
+  }
+
+  if (!listbox) {
+    // 2. 表示されていない場合、ドロップダウンボタンを探してクリックする
+    let calendarTrigger: HTMLElement | null = null;
+
+    for (const selector of triggerSelectors) {
+      const el = document.querySelector(selector);
+      if (el) {
+        calendarTrigger = el as HTMLElement;
+        console.log(`🎯 トリガーが見つかりました: ${selector}`);
+        break;
+      }
+    }
+
+    if (calendarTrigger) {
+      console.log('🎯 カレンダーのドロップダウンボタンをクリックします。');
+      calendarTrigger.click();
+      // ドロップダウンがDOMに描画されるのを少し待つ
+      await delay(300);
+
+      // 再度リストボックスを検索
+      for (const selector of CALENDAR_SELECTORS.list) {
+        listbox = document.querySelector(selector);
+        if (listbox) break;
+      }
+    }
+  }
+
+  if (!listbox) {
+    console.warn('⚠ カレンダーのリストDOMが見つかりませんでした。');
+    return false;
+  }
+
+  // 3. リスト内のカレンダー名を解析して一致するものをクリック
+  const items = Array.from(
+    listbox.querySelectorAll(CALENDAR_SELECTORS.listItem)
+  );
+  console.log(`📊 カレンダーの選択肢を解析中: ${items.length}件`);
+
+  // 完全一致 → 部分一致 の2パスで検索
+  // (textContent にはカレンダー色ラベル等の余分なテキストが含まれる場合がある)
+  let partialMatch: HTMLElement | null = null;
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i] as HTMLElement;
+    const name = extractCalendarName(item);
+    console.log(`   - 選択肢 ${i + 1}: "${name}"`);
+
+    if (name && name === calendarName) {
+      console.log(`✅ カレンダーが見つかりました（完全一致）: "${name}"`);
+      item.click();
+      return true;
+    }
+
+    // 部分一致候補（最初の1件のみ記録）
+    if (!partialMatch && name && name.includes(calendarName)) {
+      partialMatch = item;
+    }
+  }
+
+  // 完全一致が見つからなかった場合、部分一致でフォールバック
+  if (partialMatch) {
+    const name = extractCalendarName(partialMatch);
+    console.log(`✅ カレンダーが見つかりました（部分一致）: "${name}"`);
+    partialMatch.click();
+    return true;
+  }
+
+  console.warn(`⚠ カレンダー "${calendarName}" が見つかりませんでした。`);
+  return false;
+}
+
+/**
+ * カレンダーリストアイテムからカレンダー名を抽出する
+ * jsname 属性のスパンを優先し、なければ textContent にフォールバック
+ */
+function extractCalendarName(item: HTMLElement): string | undefined {
+  // Google Calendar 内部の名前表示用 span を優先的に取得
+  // jsname は内部属性のため変更される可能性があるが、
+  // textContent より正確な名前を取得できる
+  const nameSpan = item.querySelector('[jsname="K4r5Ff"]');
+  if (nameSpan?.textContent?.trim()) {
+    return nameSpan.textContent.trim();
+  }
+
+  // フォールバック: textContent 全体から取得
+  // 余分なテキスト（色名など）が含まれる可能性があるため trim のみ
+  return item.textContent?.trim();
 }

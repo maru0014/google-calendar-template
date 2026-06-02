@@ -21,6 +21,7 @@ export interface Template {
     canInviteOthers?: boolean;
     seeGuestList?: boolean;
   };
+  calendarName?: string; // 登録先カレンダー名
   order: number; // 並び順
   createdAt: number;
   updatedAt: number;
@@ -316,6 +317,7 @@ export async function importData(jsonString: string): Promise<boolean> {
       const duration: number | undefined = typeof item?.duration === 'number' && isFinite(item.duration) && item.duration >= 0
         ? Math.floor(item.duration)
         : undefined;
+      const calendarName: string | undefined = typeof item?.calendarName === 'string' && item.calendarName.trim() ? item.calendarName : undefined;
 
       if (!name || !title) {
         throw new Error('Invalid template: name and title are required');
@@ -343,6 +345,7 @@ export async function importData(jsonString: string): Promise<boolean> {
               seeGuestList: typeof item.guestPermissions.seeGuestList === 'boolean' ? item.guestPermissions.seeGuestList : undefined,
             }
           : undefined,
+        calendarName,
         order: idx,
         createdAt,
         updatedAt,

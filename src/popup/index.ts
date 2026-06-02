@@ -102,6 +102,7 @@ function openEditModal(template: Template): void {
   (document.getElementById('template-title') as HTMLInputElement).value = template.title;
   (document.getElementById('template-description') as HTMLTextAreaElement).value = template.description || '';
   (document.getElementById('template-location') as HTMLInputElement).value = template.location || '';
+  (document.getElementById('template-calendarName') as HTMLInputElement).value = template.calendarName || '';
   (document.getElementById('template-guests') as HTMLInputElement).value = template.guests?.join(', ') || '';
   (document.getElementById('template-duration') as HTMLInputElement).value = template.duration?.toString() || '';
 
@@ -127,6 +128,7 @@ async function saveTemplate(e: Event): Promise<void> {
   const title = (document.getElementById('template-title') as HTMLInputElement).value.trim();
   const description = (document.getElementById('template-description') as HTMLTextAreaElement).value.trim();
   const location = (document.getElementById('template-location') as HTMLInputElement).value.trim();
+  const calendarName = (document.getElementById('template-calendarName') as HTMLInputElement).value.trim();
   const guestsStr = (document.getElementById('template-guests') as HTMLInputElement).value.trim();
   const durationStr = (document.getElementById('template-duration') as HTMLInputElement).value.trim();
 
@@ -135,17 +137,25 @@ async function saveTemplate(e: Event): Promise<void> {
     return;
   }
 
+  const now = Date.now();
+
+  // 編集時は既存テンプレートの createdAt と order を保持する
+  const existingTemplate = editingTemplateId
+    ? templates.find((t) => t.id === editingTemplateId)
+    : null;
+
   const template: Template = {
     id: editingTemplateId || `template_${Date.now()}`,
     name,
     title,
     description: description || '',
     location: location || undefined,
+    calendarName: calendarName || undefined,
     guests: guestsStr ? guestsStr.split(',').map((g) => g.trim()).filter(Boolean) : undefined,
     duration: durationStr ? parseFloat(durationStr) : undefined,
-    order: 0,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    order: existingTemplate?.order ?? 0,
+    createdAt: existingTemplate?.createdAt ?? now,
+    updatedAt: now,
   };
 
   if (editingTemplateId) {
