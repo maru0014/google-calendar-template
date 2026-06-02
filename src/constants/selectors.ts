@@ -90,9 +90,39 @@ export const INJECTION_POINTS = {
 } as const;
 
 /**
+ * カレンダー選択ドロップダウンのセレクタ
+ * 登録先カレンダーを切り替えるためのUI要素
+ */
+export const CALENDAR_SELECTORS = {
+  // カレンダーリスト（ドロップダウンが開いた後に表示される）
+  list: [
+    '[aria-label="カレンダーのリスト"]',
+    '[aria-label="List of calendars"]',
+    '[aria-label="Calendar list"]',
+  ],
+  // カレンダーリストを開くトリガー要素
+  // ダイアログ内またはフルページ編集画面内のカレンダー選択コンボボックスに限定
+  triggers: {
+    popup: [
+      "[role='dialog'] [data-value][aria-haspopup='listbox']",
+      "[role='dialog'] [aria-label*='カレンダー'][aria-haspopup]",
+      "[role='dialog'] [aria-label*='calendar' i][aria-haspopup]",
+    ],
+    fullpage: [
+      "[data-value][aria-haspopup='listbox']",
+      "[aria-label*='カレンダー'][aria-haspopup]",
+      "[aria-label*='calendar' i][aria-haspopup]",
+    ],
+  },
+  // リスト内の個別カレンダーアイテム
+  listItem: "li[role='option']",
+} as const;
+
+/**
  * セレクタの型定義
  */
 export type PopupSelectors = typeof POPUP_SELECTORS;
 export type FullPageSelectors = typeof FULLPAGE_SELECTORS;
 export type DetectionSelectors = typeof DETECTION_SELECTORS;
 export type InjectionPoints = typeof INJECTION_POINTS;
+export type CalendarSelectors = typeof CALENDAR_SELECTORS;

@@ -166,8 +166,21 @@ function createTemplateSelector(templates: Template[], editorType: EditorType): 
         //   select.value = '';
         // }, 100);
       } else {
-        console.error('❌ Failed to apply template:', result.failedFields);
-        alert(`テンプレートの適用に失敗しました。\n失敗したフィールド: ${result.failedFields?.join(', ') || 'unknown'}`);
+        const fieldLabels: Record<string, string> = {
+          title: 'タイトル',
+          description: '説明',
+          location: '場所',
+          calendarName: `登録先カレンダー「${template.calendarName || ''}」`,
+          duration: '期間（終了時間）',
+          allDay: '終日設定',
+        };
+        const friendlyNames = result.failedFields?.map((f) => {
+          // guest:xxx 形式のフィールド名を変換
+          if (f.startsWith('guest:')) return `ゲスト（${f.slice(6)}）`;
+          if (f.startsWith('guestPermissions.')) return 'ゲストの権限';
+          return fieldLabels[f] || f;
+        }) || ['不明'];
+        alert(`テンプレートの適用に一部失敗しました。\n対象: ${friendlyNames.join('、')}`);
       }
     } catch (error) {
       console.error('❌ Error applying template:', error);
