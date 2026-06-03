@@ -72,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ゲスト権限（編集権限・招待権限・ゲストリスト表示）
 
 #### 変数置換（11種類）
+{% raw %}
 - `{{date}}` - 2025-10-24
 - `{{date_jp}}` - 2025年10月24日
 - `{{date_calendar}}` - 2025年 10月 24日
@@ -83,6 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `{{day}}` - 24
 - `{{user_email}}` - あなたのGoogleアカウントのメールアドレス
 - `{{user_name}}` - あなたのGoogleアカウントの名前
+{% endraw %}
 
 ### 🐛 バグ修正
 - React対応のフィールド値設定（nativeInputValueSetterの使用）

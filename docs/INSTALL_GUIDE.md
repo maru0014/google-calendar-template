@@ -125,6 +125,7 @@ npm run build
 
 ### 日付・時刻
 
+{% raw %}
 - `{{date}}` - 2025-10-24
 - `{{date_jp}}` - 2025年10月24日
 - `{{date_calendar}}` - 2025年 10月 24日
@@ -134,24 +135,27 @@ npm run build
 - `{{year}}` - 2025
 - `{{month}}` - 10
 - `{{day}}` - 24
+{% endraw %}
 
 ### ユーザー情報
 
+{% raw %}
 - `{{user_email}}` - あなたのGoogleアカウントのメールアドレス
 - `{{user_name}}` - あなたのGoogleアカウントの名前
+{% endraw %}
 
 ### 使用例
 
 **タイトル**:
 ```
-チームミーティング {{date_jp}}
+{% raw %}チームミーティング {{date_jp}}{% endraw %}
 ```
 → `チームミーティング 2025年10月24日`
 
 **説明**:
 ```
-作成者: {{user_name}} ({{user_email}})
-日時: {{year}}年{{month}}月{{day}}日 {{day_of_week}}
+{% raw %}作成者: {{user_name}} ({{user_email}}){% endraw %}
+{% raw %}日時: {{year}}年{{month}}月{{day}}日 {{day_of_week}}{% endraw %}
 ```
 → 
 ```
