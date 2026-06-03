@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # Google Calendar Template
 
 Googleカレンダーで予定を作成する際に、事前に保存したテンプレートを適用できるChrome拡張機能。

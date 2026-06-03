@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # インストール・使用方法ガイド
 
 Google Calendar Template 拡張機能のインストールと使用方法を説明します。
