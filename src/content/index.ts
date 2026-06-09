@@ -47,6 +47,38 @@ function detectEditorType(): EditorType {
 }
 
 /**
+ * 要素から親を辿って最初の不透明な背景色を取得
+ */
+function getEffectiveBackgroundColor(el: HTMLElement | null): string {
+  let node: HTMLElement | null = el;
+  while (node) {
+    const bg = getComputedStyle(node).backgroundColor;
+    const rgb = bg.match(/[\d.]+/g)?.map(Number);
+    // 不透明（alpha が 0 でない）な背景色が見つかったら採用
+    if (rgb && rgb.length >= 3 && (rgb[3] === undefined || rgb[3] > 0)) {
+      return bg;
+    }
+    node = node.parentElement;
+  }
+  return 'rgb(255, 255, 255)';
+}
+
+/**
+ * Googleカレンダーがダークモードかどうかを判定
+ * （ダークモードはアカウント設定で OS の prefers-color-scheme とは独立するため、
+ *   実際のページ背景色の輝度から判定する）
+ */
+function isCalendarDarkMode(): boolean {
+  const bg = getEffectiveBackgroundColor(document.body);
+  const rgb = bg.match(/[\d.]+/g)?.map(Number);
+  if (!rgb || rgb.length < 3) return false;
+  const [r, g, b] = rgb;
+  // 知覚輝度（ITU-R BT.601）
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance < 128;
+}
+
+/**
  * テンプレート選択UIを作成
  */
 function createTemplateSelector(templates: Template[], editorType: EditorType): HTMLElement {
@@ -86,6 +118,24 @@ function createTemplateSelector(templates: Template[], editorType: EditorType): 
   container.addEventListener('click', (e) => e.stopPropagation());
   container.addEventListener('change', (e) => e.stopPropagation());
 
+  // カレンダーのテーマ（ダーク/ライト）に追従するパレット
+  const dark = isCalendarDarkMode();
+  const palette = dark
+    ? {
+        labelColor: '#9aa0a6',
+        selectBg: '#2d2e30',
+        selectText: '#e8eaed',
+        selectBorder: '#5f6368',
+        selectBorderHover: '#8ab4f8',
+      }
+    : {
+        labelColor: '#5f6368',
+        selectBg: '#ffffff',
+        selectText: '#3c4043',
+        selectBorder: '#dadce0',
+        selectBorderHover: '#1a73e8',
+      };
+
   // ラベル
   const label = document.createElement('label');
   label.textContent = 'テンプレート';
@@ -93,7 +143,7 @@ function createTemplateSelector(templates: Template[], editorType: EditorType): 
   label.style.cssText = `
     display: block;
     font-size: 11px;
-    color: #5f6368;
+    color: ${palette.labelColor};
     margin-bottom: 6px;
     font-weight: 500;
     letter-spacing: 0.5px;
@@ -107,25 +157,26 @@ function createTemplateSelector(templates: Template[], editorType: EditorType): 
     display: block;
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #dadce0;
+    border: 1px solid ${palette.selectBorder};
     border-radius: 4px;
-    background: white;
+    background: ${palette.selectBg};
     font-size: 14px;
-    color: #3c4043;
+    color: ${palette.selectText};
     cursor: pointer;
     outline: none;
     font-family: 'Google Sans', Roboto, Arial, sans-serif;
     transition: border-color 0.2s;
     position: relative;
     z-index: 10001;
+    color-scheme: ${dark ? 'dark' : 'light'};
   `;
 
   // ホバー効果
   select.addEventListener('mouseenter', () => {
-    select.style.borderColor = '#1a73e8';
+    select.style.borderColor = palette.selectBorderHover;
   });
   select.addEventListener('mouseleave', () => {
-    select.style.borderColor = '#dadce0';
+    select.style.borderColor = palette.selectBorder;
   });
 
   // オプション
