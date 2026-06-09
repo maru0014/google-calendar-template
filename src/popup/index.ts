@@ -286,7 +286,8 @@ async function saveTemplate(e: Event): Promise<void> {
     guests: guestsStr ? guestsStr.split(',').map((g) => g.trim()).filter(Boolean) : undefined,
     // 終日イベント時は期間（分）を持たない
     duration: allDay || !durationStr ? undefined : parseFloat(durationStr),
-    allDay: allDay || undefined,
+    // 未チェック時も false を明示的に保存し、適用時に終日を確実に解除できるようにする
+    allDay,
     order: existingTemplate?.order ?? templates.length,
     createdAt: existingTemplate?.createdAt ?? now,
     updatedAt: now,
