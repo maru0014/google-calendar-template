@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>案A: Refined Material</title>
+<style>
+  :root{
+    --primary:#0b57d0; --primary-hover:#0a49b7;
+    --surface:#fff; --bg:#f6f8fc;
+    --border:#dadce0; --border-strong:#c4c7c5;
+    --text:#1f1f1f; --text-sub:#5f6368; --text-faint:#80868b;
+    --danger:#c5221f; --danger-bg:#fce8e6;
+    --radius:12px; --shadow:0 1px 2px rgba(60,64,67,.1),0 1px 3px rgba(60,64,67,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#e8eaed;font-family:-apple-system,"Segoe UI",Roboto,sans-serif;padding:24px;display:flex;gap:24px;flex-wrap:wrap}
+  .frame{width:500px;background:var(--bg);border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+  .caption{font-size:13px;color:#444;margin:0 0 8px;font-weight:600}
+
+  .header{padding:14px 18px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .header h1{font-size:17px;margin:0;color:var(--text);font-weight:600;display:flex;align-items:center;gap:8px}
+  .actions{display:flex;gap:8px;align-items:center}
+  .icon-btn{width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text-sub);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+  .icon-btn:hover{background:#f1f3f4;border-color:var(--border-strong)}
+  .icon-btn svg{width:18px;height:18px}
+  .icon-btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+  .icon-btn.primary:hover{background:var(--primary-hover)}
+
+  .content{padding:14px;max-height:560px;overflow-y:auto}
+  .list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);transition:.15s;position:relative}
+  .card:hover{box-shadow:0 1px 3px rgba(60,64,67,.2),0 4px 8px rgba(60,64,67,.12);border-color:var(--border-strong)}
+  .handle{color:#c4c7c5;cursor:grab;font-size:16px;line-height:1;flex-shrink:0;transition:.15s}
+  .card:hover .handle{color:var(--text-faint)}
+  .info{flex:1;min-width:0}
+  .name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
+  .badges{display:flex;flex-wrap:wrap;gap:6px}
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text-sub);background:#f1f3f4;border-radius:999px;padding:3px 9px;white-space:nowrap}
+  .badge svg{width:12px;height:12px;opacity:.7}
+  .badge.cal{background:#e8f0fe;color:#1967d2}
+  .row-actions{display:flex;gap:6px;flex-shrink:0;opacity:0;transition:.15s}
+  .card:hover .row-actions{opacity:1}
+  .mini{width:32px;height:32px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text-sub);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+  .mini:hover{background:#f1f3f4}
+  .mini.del:hover{background:var(--danger-bg);color:var(--danger);border-color:#f5b5b3}
+  .mini svg{width:16px;height:16px}
+  .hint{text-align:center;font-size:11px;color:var(--text-faint);margin-top:14px}
+</style>
+</head>
+<body>
+<div>
+<p class="caption">案A — Refined Material：現状の延長線。設定内容をバッジ可視化＋操作ボタンはhover時表示でスッキリ</p>
+<div class="frame">
+  <div class="header">
+    <h1>📅 テンプレート管理</h1>
+    <div class="actions">
+      <button class="icon-btn" title="エクスポート"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M12 3v9M8 7l4-4 4 4"/></svg></button>
+      <button class="icon-btn" title="インポート"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M12 3v9M16 8l-4 4-4-4"/></svg></button>
+      <button class="icon-btn primary" title="新規作成"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg></button>
+    </div>
+  </div>
+  <div class="content">
+    <ul class="list">
+      <li class="card">
+        <span class="handle">⠿</span>
+        <div class="info">
+          <div class="name">チームミーティング</div>
+          <div class="badges">
+            <span class="badge cal"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V9h14v11z"/></svg>仕事用</span>
+            <span class="badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>会議室A</span>
+            <span class="badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>3名</span>
+            <span class="badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 11h-5v-2h3V7h2v6z"/></svg>30分</span>
+          </div>
+        </div>
+        <div class="row-actions">
+          <button class="mini" title="編集"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+          <button class="mini del" title="削除"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+        </div>
+      </li>
+      <li class="card">
+        <span class="handle">⠿</span>
+        <div class="info">
+          <div class="name">1on1 ミーティング</div>
+          <div class="badges">
+            <span class="badge cal"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V9h14v11z"/></svg>仕事用</span>
+            <span class="badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3z"/></svg>1名</span>
+            <span class="badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 11h-5v-2h3V7h2v6z"/></svg>30分</span>
+          </div>
+        </div>
+        <div class="row-actions">
+          <button class="mini" title="編集"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+          <button class="mini del" title="削除"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+        </div>
+      </li>
+      <li class="card">
+        <span class="handle">⠿</span>
+        <div class="info">
+          <div class="name">集中作業ブロック</div>
+          <div class="badges">
+            <span class="badge cal"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V9h14v11z"/></svg>個人</span>
+            <span class="badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 11h-5v-2h3V7h2v6z"/></svg>90分</span>
+          </div>
+        </div>
+        <div class="row-actions">
+          <button class="mini" title="編集"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+          <button class="mini del" title="削除"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+        </div>
+      </li>
+    </ul>
+    <div class="hint">⠿ をドラッグして並べ替え</div>
+  </div>
+</div>
+</div>
+</body>
+</html>

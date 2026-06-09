@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>案B: Compact Modal + 変数チップ</title>
+<style>
+  :root{
+    --primary:#0b57d0; --primary-hover:#0a49b7;
+    --surface:#fff; --bg:#fff; --field:#fff;
+    --border:#dadce0; --text:#1f1f1f; --text-sub:#5f6368;
+    --chip:#e8f0fe; --chip-text:#1967d2;
+  }
+  body.dark{
+    --primary:#8ab4f8; --primary-hover:#aecbfa;
+    --surface:#2d2e30; --bg:#202124; --field:#202124;
+    --border:#5f6368; --text:#e8eaed; --text-sub:#9aa0a6;
+    --chip:#1e3a5f; --chip-text:#8ab4f8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#3c4043;font-family:-apple-system,"Segoe UI",Roboto,sans-serif;padding:24px;transition:.2s}
+  .caption{font-size:13px;color:#e8eaed;margin:0 0 8px;font-weight:600}
+  .toggle{margin-bottom:16px}
+  .toggle button{background:#5f6368;color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px}
+
+  .modal{width:520px;background:var(--surface);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.4);overflow:hidden;color:var(--text)}
+  .modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface)}
+  .modal-head h2{margin:0;font-size:17px;font-weight:600}
+  .x{background:none;border:none;color:var(--text-sub);font-size:22px;cursor:pointer;line-height:1}
+  .body{padding:18px 22px;max-height:440px;overflow-y:auto}
+
+  .section{font-size:12px;font-weight:700;color:var(--text-sub);text-transform:none;letter-spacing:.02em;margin:4px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .fg{margin-bottom:14px}
+  .fg.full{grid-column:1/-1}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+  .req{color:#d93025}
+  input,textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--field);color:var(--text)}
+  textarea{min-height:64px;resize:vertical}
+  input:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 25%,transparent)}
+  .suffix-wrap{position:relative}
+  .suffix-wrap .suffix{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-sub)}
+  .quick{display:flex;gap:6px;margin-top:6px}
+  .quick span{font-size:12px;color:var(--primary);border:1px solid var(--border);border-radius:999px;padding:2px 10px;cursor:pointer}
+  .quick span:hover{background:var(--chip)}
+
+  .vars-label{font-size:11px;color:var(--text-sub);margin:6px 0 4px}
+  .vars{display:flex;flex-wrap:wrap;gap:5px}
+  .var{font-size:11px;font-family:ui-monospace,monospace;background:var(--chip);color:var(--chip-text);border:none;border-radius:6px;padding:3px 8px;cursor:pointer}
+  .var:hover{filter:brightness(.95)}
+
+  .foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:var(--surface)}
+  .btn{padding:9px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none}
+  .btn.cancel{background:transparent;color:var(--primary)}
+  .btn.cancel:hover{background:var(--chip)}
+  .btn.save{background:var(--primary);color:#fff}
+  body.dark .btn.save{color:#202124}
+</style>
+</head>
+<body>
+  <p class="caption">案B — Compact Modal：2カラム化でスクロール激減。説明欄に「変数チップ」を追加（クリックで挿入）。右上ボタンでダークモード確認</p>
+  <div class="toggle"><button onclick="document.body.classList.toggle('dark')">🌓 ダークモード切替</button></div>
+
+  <div class="modal">
+    <div class="modal-head">
+      <h2>テンプレートを編集</h2>
+      <button class="x">×</button>
+    </div>
+    <div class="body">
+      <div class="section">基本情報</div>
+      <div class="fg">
+        <label>テンプレート名 <span class="req">*</span></label>
+        <input value="チームミーティング">
+      </div>
+      <div class="fg">
+        <label>タイトル <span class="req">*</span></label>
+        <input value="週次定例 {{date_jp}}">
+        <div class="vars-label">クリックで変数を挿入：</div>
+        <div class="vars">
+          <button class="var">{{date}}</button>
+          <button class="var">{{date_jp}}</button>
+          <button class="var">{{day_of_week}}</button>
+          <button class="var">{{time}}</button>
+          <button class="var">{{user_name}}</button>
+          <button class="var">…</button>
+        </div>
+      </div>
+      <div class="fg full">
+        <label>説明</label>
+        <textarea>週次のチーム定例会議です。</textarea>
+        <div class="vars">
+          <button class="var">{{date}}</button>
+          <button class="var">{{datetime}}</button>
+          <button class="var">{{user_email}}</button>
+        </div>
+      </div>
+
+      <div class="section">詳細設定</div>
+      <div class="grid">
+        <div class="fg">
+          <label>場所</label>
+          <input value="会議室A">
+        </div>
+        <div class="fg">
+          <label>登録先カレンダー名</label>
+          <input value="仕事用">
+        </div>
+        <div class="fg full">
+          <label>ゲスト（カンマ区切り）</label>
+          <input placeholder="user1@example.com, user2@example.com">
+        </div>
+        <div class="fg">
+          <label>期間</label>
+          <div class="suffix-wrap">
+            <input value="30" style="padding-right:34px">
+            <span class="suffix">分</span>
+          </div>
+          <div class="quick"><span>15</span><span>30</span><span>60</span><span>90</span></div>
+        </div>
+        <div class="fg" style="display:flex;align-items:flex-end">
+          <label style="display:flex;align-items:center;gap:8px;font-weight:500;margin:0 0 9px">
+            <input type="checkbox" style="width:auto"> 終日イベント
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="foot">
+      <button class="btn cancel">キャンセル</button>
+      <button class="btn save">保存</button>
+    </div>
+  </div>
+</body>
+</html>

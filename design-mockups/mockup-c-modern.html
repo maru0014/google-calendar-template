@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>案C: Modern Soft</title>
+<style>
+  :root{
+    --primary:#0b57d0; --bg:#f0f4f9; --surface:#fff;
+    --text:#1f1f1f; --text-sub:#5f6368; --border:#e3e6ea;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe3e8;font-family:-apple-system,"Segoe UI",Roboto,sans-serif;padding:24px;display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+  .caption{font-size:13px;color:#444;margin:0 0 8px;font-weight:600;max-width:500px}
+
+  .frame{width:500px;background:var(--bg);border-radius:18px;overflow:hidden;box-shadow:0 10px 36px rgba(0,0,0,.18)}
+  .header{padding:18px 20px 14px;background:var(--surface)}
+  .header-top{display:flex;align-items:center;justify-content:space-between}
+  .header h1{font-size:18px;margin:0;font-weight:700;color:var(--text);display:flex;gap:9px;align-items:center}
+  .sub{font-size:12px;color:var(--text-sub);margin-top:3px}
+  .actions{display:flex;gap:8px}
+  .icon-btn{width:36px;height:36px;border:none;border-radius:10px;background:#f1f3f4;color:var(--text-sub);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+  .icon-btn:hover{background:#e4e7ea}
+  .icon-btn svg{width:18px;height:18px}
+  .icon-btn.primary{background:var(--primary);color:#fff}
+  .icon-btn.primary:hover{filter:brightness(1.08)}
+
+  .content{padding:16px;display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--surface);border-radius:var(--radius);padding:14px 16px;display:flex;gap:13px;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:.18s;border:1px solid transparent}
+  .card:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.1)}
+  .avatar{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .a1{background:#e8f0fe}.a2{background:#e6f4ea}.a3{background:#fef7e0}
+  .info{flex:1;min-width:0}
+  .name{font-size:15px;font-weight:600;color:var(--text)}
+  .meta{font-size:12px;color:var(--text-sub);margin-top:4px;display:flex;gap:10px;flex-wrap:wrap}
+  .meta b{font-weight:600;color:#3c4043}
+  .row-actions{display:flex;gap:6px;flex-shrink:0}
+  .mini{width:32px;height:32px;border:none;border-radius:9px;background:#f1f3f4;color:var(--text-sub);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+  .mini:hover{background:#e4e7ea}
+  .mini.del:hover{background:#fce8e6;color:#c5221f}
+  .mini svg{width:16px;height:16px}
+
+  /* カレンダー内挿入UI */
+  .gc-panel{width:360px}
+  .gc-box{background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:16px;border:1px solid #e3e6ea}
+  .gc-row{display:flex;align-items:center;gap:8px;font-size:13px;color:#3c4043;font-weight:600;margin-bottom:8px}
+  .gc-badge{background:#e8f0fe;color:#1967d2;font-size:11px;border-radius:6px;padding:2px 7px}
+  .gc-select{width:100%;padding:10px 12px;border:1px solid #dadce0;border-radius:10px;font-size:14px;background:#fff;color:#3c4043;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%235f6368'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+  .toast{margin-top:10px;background:#e6f4ea;color:#137333;font-size:12px;border-radius:8px;padding:8px 12px;display:flex;gap:6px;align-items:center}
+</style>
+</head>
+<body>
+<div>
+  <p class="caption">案C — Modern Soft：色分けアイコン＋柔らかい影で親しみやすく。並べ替えはカード全体ドラッグ</p>
+  <div class="frame">
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <h1>📅 テンプレート管理</h1>
+          <div class="sub">3件のテンプレート</div>
+        </div>
+        <div class="actions">
+          <button class="icon-btn" title="エクスポート"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M12 3v9M8 7l4-4 4 4"/></svg></button>
+          <button class="icon-btn" title="インポート"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M12 3v9M16 8l-4 4-4-4"/></svg></button>
+          <button class="icon-btn primary" title="新規作成"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg></button>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="card">
+        <div class="avatar a1">👥</div>
+        <div class="info">
+          <div class="name">チームミーティング</div>
+          <div class="meta"><span>📅 <b>仕事用</b></span><span>📍 会議室A</span><span>⏱ 30分</span><span>👤 3名</span></div>
+        </div>
+        <div class="row-actions">
+          <button class="mini"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+          <button class="mini del"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="avatar a2">🤝</div>
+        <div class="info">
+          <div class="name">1on1 ミーティング</div>
+          <div class="meta"><span>📅 <b>仕事用</b></span><span>⏱ 30分</span><span>👤 1名</span></div>
+        </div>
+        <div class="row-actions">
+          <button class="mini"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+          <button class="mini del"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="avatar a3">🎯</div>
+        <div class="info">
+          <div class="name">集中作業ブロック</div>
+          <div class="meta"><span>📅 <b>個人</b></span><span>⏱ 90分</span></div>
+        </div>
+        <div class="row-actions">
+          <button class="mini"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+          <button class="mini del"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="gc-panel">
+  <p class="caption">カレンダー内に挿入される選択UI（before→after）。拡張だと分かるラベル＋適用後トースト</p>
+  <div class="gc-box">
+    <div class="gc-row">📅 テンプレートから入力 <span class="gc-badge">拡張機能</span></div>
+    <select class="gc-select">
+      <option>テンプレートを選択...</option>
+      <option>チームミーティング</option>
+      <option>1on1 ミーティング</option>
+      <option>集中作業ブロック</option>
+    </select>
+    <div class="toast">✓ 「チームミーティング」を適用しました</div>
+  </div>
+</div>
+</body>
+</html>
