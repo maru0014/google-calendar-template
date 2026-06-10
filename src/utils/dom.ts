@@ -35,8 +35,15 @@ export function setFieldValue(
     element.focus();
 
     // チェックボックス
+    // React 制御のチェックボックスは checked への直接代入だと onChange が発火せず
+    // 内部状態が更新されないことがあるため、現在値と期待値が異なる場合のみ click() で
+    // ネイティブにトグルする（click が input/change を発火するため二重発火を避けて early return）
     if (element instanceof HTMLInputElement && element.type === 'checkbox') {
-      element.checked = Boolean(value);
+      const desired = Boolean(value);
+      if (element.checked !== desired) {
+        element.click();
+      }
+      return true;
     }
     // contenteditable（説明フィールド）
     // 重要: innerHTML は TrustedHTML エラーになるため innerText を使用
