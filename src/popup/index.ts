@@ -277,6 +277,8 @@ async function saveTemplate(e: Event): Promise<void> {
     : null;
 
   const template: Template = {
+    // フォームに無い項目（guestPermissions / visibility 等）を保持するため既存レコードを引き継ぐ
+    ...existingTemplate,
     id: editingTemplateId || `template_${Date.now()}`,
     name,
     title,
@@ -536,7 +538,16 @@ async function init(): Promise<void> {
   });
 
   // テンプレートを読み込み
-  templates = await loadTemplates();
+  try {
+    templates = await loadTemplates();
+  } catch (error) {
+    // 読み込み失敗時に空の一覧から保存すると既存データを上書きするため、編集系を無効化する
+    console.error('❌ Failed to load templates:', error);
+    createBtn.disabled = true;
+    importBtn.disabled = true;
+    alert('テンプレートの読み込みに失敗しました。拡張機能のポップアップを開き直してください。');
+    return;
+  }
   renderTemplates();
 
   console.log('✅ Popup initialized');

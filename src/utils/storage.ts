@@ -39,6 +39,8 @@ const STORAGE_KEYS = {
 
 /**
  * テンプレート一覧を取得
+ * 読み込みに失敗した場合は空配列にせず例外を投げる
+ * （空配列扱いにすると、後続の保存で既存データを上書きしてしまうため）
  */
 export async function getTemplates(): Promise<Template[]> {
   try {
@@ -46,7 +48,7 @@ export async function getTemplates(): Promise<Template[]> {
     return result[STORAGE_KEYS.TEMPLATES] || [];
   } catch (error) {
     console.error('Failed to get templates:', error);
-    return [];
+    throw error;
   }
 }
 
@@ -309,6 +311,8 @@ export async function importData(jsonString: string): Promise<boolean> {
       if (existingIds.has(id)) {
         id = generateId();
       }
+      // 同じファイル内のID重複も避けるため、採用したIDを記録する
+      existingIds.add(id);
 
       const name: string = typeof item?.name === 'string' ? item.name : '';
       const title: string = typeof item?.title === 'string' ? item.title : '';

@@ -496,7 +496,7 @@ async function selectCalendar(
 
   // 完全一致 → 部分一致 の2パスで検索
   // (textContent にはカレンダー色ラベル等の余分なテキストが含まれる場合がある)
-  let partialMatch: HTMLElement | null = null;
+  const partialMatches: HTMLElement[] = [];
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i] as HTMLElement;
@@ -509,18 +509,25 @@ async function selectCalendar(
       return true;
     }
 
-    // 部分一致候補（最初の1件のみ記録）
-    if (!partialMatch && name && name.includes(calendarName)) {
-      partialMatch = item;
+    if (name && name.includes(calendarName)) {
+      partialMatches.push(item);
     }
   }
 
-  // 完全一致が見つからなかった場合、部分一致でフォールバック
-  if (partialMatch) {
-    const name = extractCalendarName(partialMatch);
+  // 完全一致が見つからなかった場合、部分一致が1件だけならフォールバック
+  // 複数候補がある場合は別のカレンダーへ誤登録しないよう失敗として扱う
+  if (partialMatches.length === 1) {
+    const name = extractCalendarName(partialMatches[0]);
     console.log(`✅ カレンダーが見つかりました（部分一致）: "${name}"`);
-    partialMatch.click();
+    partialMatches[0].click();
     return true;
+  }
+
+  if (partialMatches.length > 1) {
+    console.warn(
+      `⚠ カレンダー "${calendarName}" に部分一致する候補が複数あるため選択しませんでした。`
+    );
+    return false;
   }
 
   console.warn(`⚠ カレンダー "${calendarName}" が見つかりませんでした。`);

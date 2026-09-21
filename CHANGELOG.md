@@ -9,6 +9,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🐛 バグ修正
+- テンプレート編集でゲスト権限・公開範囲が消える問題を修正
+- 登録先カレンダー名の部分一致が複数ある場合、別カレンダーへ誤登録しないよう失敗として通知
+- ストレージ読み込み失敗時に空配列扱いとなり、既存テンプレートが上書きされる問題を修正
+- 同一インポートファイル内でIDが重複した場合、一意なIDを採番するよう修正（誤適用・まとめて削除の防止）
+- `{{date}}` が日本時間の午前0〜9時に前日になる問題を修正（ローカル日付を使用）
+- `{{user_email}}` / `{{user_name}}` がゲストのメールやテンプレート選択欄を拾う問題を修正
+
 ## [0.4.0] - 2026-06-09
 
 ### ✨ 追加機能

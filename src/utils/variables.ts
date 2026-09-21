@@ -31,7 +31,12 @@ function getDateTime(): Date {
  * 日付 (ISO形式)
  */
 function getDate(): string {
-  return getDateTime().toISOString().split('T')[0];
+  // toISOString() は UTC のため、日本時間の午前0〜9時に前日になる。ローカル日付で組み立てる
+  const date = getDateTime();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -110,34 +115,14 @@ function getDay(): string {
 function getUserEmail(): string | null {
   const emailPattern = /[\w\.-]+@[\w\.-]+\.\w+/g;
 
-  // 方法1: プロフィールボタンのaria-label
-  const profileButton = document.querySelector("[aria-label*='Google アカウント']");
+  // プロフィールボタンのaria-label（ログインアカウントを特定できる唯一の要素）
+  // ページ本文やカレンダー一覧のメールはゲスト・共有カレンダーのものを拾うため使わない
+  const profileButton = document.querySelector(
+    "[aria-label*='Google アカウント'], [aria-label*='Google Account']"
+  );
   if (profileButton) {
     const ariaLabel = profileButton.getAttribute('aria-label');
     const match = ariaLabel?.match(emailPattern);
-    if (match) return match[0];
-  }
-
-  // 方法2: ページ内のテキストから探す
-  const bodyText = document.body.innerText;
-  const emails = bodyText.match(emailPattern);
-  if (emails && emails.length > 0) {
-    // @gmail.com や個人ドメインのメールを優先
-    const personalEmails = emails.filter(
-      (email) =>
-        !email.includes('@google.com') && !email.includes('@example.com')
-    );
-    if (personalEmails.length > 0) {
-      return personalEmails[0];
-    }
-  }
-
-  // 方法3: カレンダー一覧から取得を試みる
-  const calendarInputs = document.querySelectorAll<HTMLInputElement>(
-    "input[aria-label*='カレンダー']"
-  );
-  for (const input of Array.from(calendarInputs)) {
-    const match = input.value.match(emailPattern);
     if (match) return match[0];
   }
 
@@ -149,7 +134,9 @@ function getUserEmail(): string | null {
  */
 function getUserName(): string | null {
   // 方法1: プロフィールボタンのaria-label
-  const profileButton = document.querySelector("[aria-label*='Google アカウント']");
+  const profileButton = document.querySelector(
+    "[aria-label*='Google アカウント'], [aria-label*='Google Account']"
+  );
   if (profileButton) {
     const ariaLabel = profileButton.getAttribute('aria-label');
     // "Google アカウント: Name (email@example.com)" の形式から名前を抽出
@@ -157,17 +144,8 @@ function getUserName(): string | null {
     if (match) return match[1].trim();
   }
 
-  // 方法2: カレンダー選択から取得
-  const calendarSelect = document.querySelector('select');
-  if (calendarSelect) {
-    const selectedOption =
-      calendarSelect.options[calendarSelect.selectedIndex];
-    if (selectedOption && !selectedOption.text.includes('@')) {
-      return selectedOption.text;
-    }
-  }
-
-  // 方法3: メールアドレスからユーザー名部分を抽出
+  // 方法2: メールアドレスからユーザー名部分を抽出
+  // （旧: ページ最初の <select> の選択肢を名前として使っていたが、拡張機能自身のテンプレート選択を拾うため廃止）
   const email = getUserEmail();
   if (email) {
     return email.split('@')[0];
