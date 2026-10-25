@@ -141,6 +141,48 @@ describe.each(['popup', 'fullpage'] as const)('B07/B08: %s', (view_type) => {
   });
 });
 
+it('詳細画面では同日内でも終了日欠落を成功にしない', async () => {
+  vi.mocked(detectCurrentView).mockReturnValue({ isPopup: false, isFullPage: true });
+  fields[FULLPAGE_SELECTORS.startDate] = input('2026年 10月 28日');
+  fields[FULLPAGE_SELECTORS.startTime] = input('18:30');
+  fields[FULLPAGE_SELECTORS.endTime] = input('19:30');
+  const pending = applyTemplate({ ...empty_template, duration: 30 });
+  await vi.runAllTimersAsync();
+  expect((await pending).failedFields).toEqual(['duration']);
+});
+
+describe('実DOMで確認した小さい画面の終了日なし構造', () => {
+  beforeEach(() => {
+    vi.mocked(detectCurrentView).mockReturnValue({ isPopup: true, isFullPage: false });
+    fields[POPUP_SELECTORS.startDate] = input('10月 28日 (水曜日)');
+    fields[POPUP_SELECTORS.startTime] = input('18:30');
+    fields[POPUP_SELECTORS.endTime] = input('19:30');
+  });
+  const apply_compact_duration = async (duration: number) => {
+    const pending = applyTemplate({ ...empty_template, duration });
+    await vi.runAllTimersAsync();
+    return pending;
+  };
+  it.each([{ duration: 30, time: '19:00' }, { duration: 60, time: '19:30' }])(
+    '終了日欄がなく年なし表示でも同日内の$duration 分は成功', async ({ duration, time }) => {
+      expect((await apply_compact_duration(duration)).success).toBe(true);
+      expect(fields[POPUP_SELECTORS.endTime].value).toBe(time);
+    }
+  );
+  it.each([1440, 1500, 2880])('終了日欄なしで日跨ぎの%s 分は成功にしない', async (duration) => {
+    expect((await apply_compact_duration(duration)).failedFields).toEqual(['duration']);
+    expect(fields[POPUP_SELECTORS.endTime].value).toBe('19:30');
+  });
+  it('24時間未満でも深夜を跨ぐ場合は成功にしない', async () => {
+    fields[POPUP_SELECTORS.startTime].value = '23:30';
+    expect((await apply_compact_duration(60)).failedFields).toEqual(['duration']);
+  });
+  it('同日内でも時刻が書き込まれなければ失敗にする', async () => {
+    vi.mocked(setFieldValue).mockImplementation(() => true);
+    expect((await apply_compact_duration(30)).failedFields).toEqual(['duration']);
+  });
+});
+
 describe('B07: fullpage のゲスト権限', () => {
   it.each(['canModify', 'canInviteOthers', 'seeGuestList'] as const)('false指定でも欠落を返す: %s', async (field) => {
     vi.mocked(detectCurrentView).mockReturnValue({ isPopup: false, isFullPage: true });

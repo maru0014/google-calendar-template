@@ -125,7 +125,7 @@ async function applyToPopup(
 
   // 時間数（終了時間を計算）- 最後に実行
   if (template.duration) {
-    await set_duration(template.duration, POPUP_SELECTORS, results);
+    await set_duration(template.duration, POPUP_SELECTORS, results, true);
   }
 }
 
@@ -223,7 +223,8 @@ import { advance_calendar_date } from './calendar_date';
 async function set_duration(
   minutes: number,
   selectors: DurationSelectors,
-  results: FieldSetResult[]
+  results: FieldSetResult[],
+  allow_popup_time_only = false
 ): Promise<void> {
   try {
     const start_time = getElement<HTMLInputElement>(selectors.startTime);
@@ -231,13 +232,20 @@ async function set_duration(
     const start_date = getElement<HTMLInputElement>(selectors.startDate);
     const end_date = getElement<HTMLInputElement>(selectors.endDate);
     const parsed_time = start_time && parseTime(start_time.value);
-    if (!start_time || !end_time || !start_date || !end_date || !parsed_time ||
+    if (!start_time || !end_time || !start_date || !parsed_time ||
         !Number.isSafeInteger(minutes) || minutes < 0) {
       results.push({ field: 'duration', success: false });
       return;
     }
     const total_minutes = parsed_time.hours * 60 + parsed_time.minutes + minutes;
     const days = Math.floor(total_minutes / 1440);
+    // Calendar's compact single-day editor has no end-date input.
+    // Preserve time-only updates there, but never wrap a multi-day duration silently.
+    const time_only = allow_popup_time_only && days === 0 && !end_date;
+    if (!end_date && !time_only) {
+      results.push({ field: 'duration', success: false });
+      return;
+    }
     // Same-day durations do not need locale-specific date parsing.
     const end_date_value = days === 0 ? start_date.value.trim() : advance_calendar_date(start_date.value, days);
     if (!end_date_value) {
@@ -247,7 +255,7 @@ async function set_duration(
     const end_time_value = String(Math.floor(total_minutes / 60) % 24).padStart(2, '0') + ':' +
       String(total_minutes % 60).padStart(2, '0');
 
-    if (end_date.value !== end_date_value) {
+    if (end_date && end_date.value !== end_date_value) {
       if (!setFieldValue(end_date, end_date_value)) {
         results.push({ field: 'duration', success: false });
         return;
@@ -270,8 +278,11 @@ async function set_duration(
     const confirmed_date = getElement<HTMLInputElement>(selectors.endDate);
     const confirmed_time = getElement<HTMLInputElement>(selectors.endTime);
     const parsed_end_time = confirmed_time && parseTime(confirmed_time.value);
-    const success = !!confirmed_date && !!parsed_end_time &&
-      (days === 0 ? confirmed_date.value.trim() : advance_calendar_date(confirmed_date.value, 0)) === end_date_value &&
+    const date_confirmed = time_only
+      ? !confirmed_date
+      : !!confirmed_date &&
+        (days === 0 ? confirmed_date.value.trim() : advance_calendar_date(confirmed_date.value, 0)) === end_date_value;
+    const success = date_confirmed && !!parsed_end_time &&
       parsed_end_time.hours === Math.floor(total_minutes / 60) % 24 &&
       parsed_end_time.minutes === total_minutes % 60;
     results.push({ field: 'duration', success });
