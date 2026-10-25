@@ -7,7 +7,7 @@ import { Template } from './storage';
 import { replaceVariables } from './variables';
 import { setFieldValue, addGuest, detectCurrentView, getElement, closeFieldDropdown } from './dom';
 import { POPUP_SELECTORS, FULLPAGE_SELECTORS, CALENDAR_SELECTORS } from '../constants/selectors';
-import type { ApplyResult, FieldSetResult } from '../types';
+import type { ApplyResult, FieldSetResult, DurationSelectors } from '../types';
 
 /**
  * テンプレートを適用
@@ -57,17 +57,17 @@ async function applyToPopup(
 ): Promise<void> {
   // タイトル
   const titleElement = getElement<HTMLElement>(POPUP_SELECTORS.title);
-  if (titleElement) {
+  if (titleElement || template.title) {
     const title = replaceVariables(template.title);
-    const success = setFieldValue(titleElement, title);
+    const success = !!titleElement && setFieldValue(titleElement, title);
     results.push({ field: 'title', success });
   }
 
   // 説明
   const descElement = getElement<HTMLElement>(POPUP_SELECTORS.description);
-  if (descElement) {
+  if (descElement || template.description) {
     const description = replaceVariables(template.description);
-    const success = setFieldValue(descElement, description);
+    const success = !!descElement && setFieldValue(descElement, description);
     results.push({ field: 'description', success });
   }
 
@@ -78,6 +78,8 @@ async function applyToPopup(
       const location = replaceVariables(template.location);
       const success = setFieldValue(locationElement, location);
       results.push({ field: 'location', success });
+    } else {
+      results.push({ field: 'location', success: false });
     }
   }
 
@@ -96,6 +98,10 @@ async function applyToPopup(
       // ゲスト入力完了後、ドロップダウンを閉じる
       await delay(200);
       closeFieldDropdown(guestElement);
+    } else {
+      for (const email of template.guests) {
+        results.push({ field: `guest:${email}`, success: false });
+      }
     }
   }
 
@@ -105,6 +111,8 @@ async function applyToPopup(
     if (allDayElement) {
       const success = setFieldValue(allDayElement, template.allDay);
       results.push({ field: 'allDay', success });
+    } else {
+      results.push({ field: 'allDay', success: false });
     }
   }
 
@@ -117,7 +125,7 @@ async function applyToPopup(
 
   // 時間数（終了時間を計算）- 最後に実行
   if (template.duration) {
-    await setDurationForPopup(template.duration, results);
+    await set_duration(template.duration, POPUP_SELECTORS, results, true);
   }
 }
 
@@ -130,17 +138,17 @@ async function applyToFullPage(
 ): Promise<void> {
   // タイトル
   const titleElement = getElement<HTMLElement>(FULLPAGE_SELECTORS.title);
-  if (titleElement) {
+  if (titleElement || template.title) {
     const title = replaceVariables(template.title);
-    const success = setFieldValue(titleElement, title);
+    const success = !!titleElement && setFieldValue(titleElement, title);
     results.push({ field: 'title', success });
   }
 
   // 説明
   const descElement = getElement<HTMLElement>(FULLPAGE_SELECTORS.description);
-  if (descElement) {
+  if (descElement || template.description) {
     const description = replaceVariables(template.description);
-    const success = setFieldValue(descElement, description);
+    const success = !!descElement && setFieldValue(descElement, description);
     results.push({ field: 'description', success });
   }
 
@@ -151,6 +159,8 @@ async function applyToFullPage(
       const location = replaceVariables(template.location);
       const success = setFieldValue(locationElement, location);
       results.push({ field: 'location', success });
+    } else {
+      results.push({ field: 'location', success: false });
     }
   }
 
@@ -169,6 +179,10 @@ async function applyToFullPage(
       // ゲスト入力完了後、ドロップダウンを閉じる
       await delay(200);
       closeFieldDropdown(guestElement);
+    } else {
+      for (const email of template.guests) {
+        results.push({ field: `guest:${email}`, success: false });
+      }
     }
   }
 
@@ -178,6 +192,8 @@ async function applyToFullPage(
     if (allDayElement) {
       const success = setFieldValue(allDayElement, template.allDay);
       results.push({ field: 'allDay', success });
+    } else {
+      results.push({ field: 'allDay', success: false });
     }
   }
 
@@ -196,198 +212,82 @@ async function applyToFullPage(
   // 時間数（終了時間を計算）- 最後に実行
   if (template.duration) {
     await delay(300); // 他のフィールドが確定するまで待機
-    await setDuration(template.duration, results);
+    await set_duration(template.duration, FULLPAGE_SELECTORS, results);
   }
 }
 
 import { parseTime } from './time';
+import { advance_calendar_date } from './calendar_date';
 
-/**
- * 時間数から終了時間を設定（フルページ用）
- */
-async function setDuration(
+/** Set the end date and time together, preserving calendar-day rollover. */
+async function set_duration(
   minutes: number,
-  results: FieldSetResult[]
+  selectors: DurationSelectors,
+  results: FieldSetResult[],
+  allow_popup_time_only = false
 ): Promise<void> {
-  const startTimeElement = getElement<HTMLInputElement>(
-    FULLPAGE_SELECTORS.startTime
-  );
-  const endTimeElement = getElement<HTMLInputElement>(
-    FULLPAGE_SELECTORS.endTime
-  );
-
-  if (!startTimeElement || !endTimeElement) {
-    results.push({ field: 'duration', success: false });
-    return;
-  }
-
   try {
-    // 現在の開始時刻を取得
-    const startTimeStr = startTimeElement.value || '09:00';
-    const startTime = parseTime(startTimeStr);
-
-    if (!startTime) {
-      console.error(`Failed to parse start time: ${startTimeStr}`);
+    const start_time = getElement<HTMLInputElement>(selectors.startTime);
+    const end_time = getElement<HTMLInputElement>(selectors.endTime);
+    const start_date = getElement<HTMLInputElement>(selectors.startDate);
+    const end_date = getElement<HTMLInputElement>(selectors.endDate);
+    const parsed_time = start_time && parseTime(start_time.value);
+    if (!start_time || !end_time || !start_date || !parsed_time ||
+        !Number.isSafeInteger(minutes) || minutes < 0) {
       results.push({ field: 'duration', success: false });
       return;
     }
-
-    const { hours, minutes: mins } = startTime;
-
-    // 終了時刻を計算（minutesは分数）
-    const startMinutes = hours * 60 + mins;
-    const endMinutes = startMinutes + minutes;
-    const endHours = Math.floor(endMinutes / 60) % 24;
-    const endMins = endMinutes % 60;
-
-    // 終了時刻を設定
-    // Note: Google Calendar usually expects 24h format for value setting,
-    // even if display is 12h. But we should check if we need to format it back to AM/PM
-    // based on the input format. However, usually setting value in 24h format works for input[type="text"]
-    // or specific calendar inputs.
-    // Let's stick to 24h format for now as it's safer for calculation,
-    // but if the UI requires AM/PM we might need `formatTime` helper.
-    // Given the issue is about *calculation* failing because of parsing,
-    // fixing parsing is the first step.
-    // The original code set it as HH:mm (24h).
-
-    const endTimeValue = `${String(endHours).padStart(2, '0')}:${String(
-      endMins
-    ).padStart(2, '0')}`;
-
-    console.log(`⏰ Setting end time: ${endTimeValue} (duration: ${minutes} minutes)`);
-
-    // フォーカスを当ててから値を設定
-    endTimeElement.focus();
-    await delay(100);
-
-    // React対応の値設定
-    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      'value'
-    )?.set;
-
-    if (nativeInputValueSetter) {
-      nativeInputValueSetter.call(endTimeElement, endTimeValue);
-    } else {
-      endTimeElement.value = endTimeValue;
-    }
-
-    // イベント発火
-    endTimeElement.dispatchEvent(new Event('input', { bubbles: true }));
-    endTimeElement.dispatchEvent(new Event('change', { bubbles: true }));
-
-    console.log(`⏰ End time set to: ${endTimeElement.value}`);
-
-    // Enterキーを送信して視覚的な更新をトリガー
-    await delay(100);
-    endTimeElement.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'Enter',
-      code: 'Enter',
-      keyCode: 13,
-      bubbles: true,
-    }));
-    console.log(`⏰ Enter key sent`);
-
-    // 値の確定のため待機
-    await delay(300);
-    console.log(`⏰ End time after 300ms: ${endTimeElement.value}`);
-
-    // 重要: 時刻フィールドのプルダウンは閉じない
-    // Escapeを送信すると値が初期値にリセットされるため
-    // プルダウンは開いたままになるが、Enterキーで視覚的には反映される
-
-    results.push({ field: 'duration', success: true });
-  } catch (error) {
-    console.error('Failed to set duration:', error);
-    results.push({ field: 'duration', success: false });
-  }
-}
-
-/**
- * 時間数から終了時間を設定（ポップアップ用）
- */
-async function setDurationForPopup(
-  minutes: number,
-  results: FieldSetResult[]
-): Promise<void> {
-  const startTimeElement = getElement<HTMLInputElement>(
-    POPUP_SELECTORS.startTime
-  );
-  const endTimeElement = getElement<HTMLInputElement>(
-    POPUP_SELECTORS.endTime
-  );
-
-  if (!startTimeElement || !endTimeElement) {
-    results.push({ field: 'duration', success: false });
-    return;
-  }
-
-  try {
-    // 現在の開始時刻を取得
-    const startTimeStr = startTimeElement.value || '09:00';
-    const startTime = parseTime(startTimeStr);
-
-    if (!startTime) {
-      console.error(`Failed to parse start time: ${startTimeStr}`);
+    const total_minutes = parsed_time.hours * 60 + parsed_time.minutes + minutes;
+    const days = Math.floor(total_minutes / 1440);
+    // Calendar's compact single-day editor has no end-date input.
+    // Preserve time-only updates there, but never wrap a multi-day duration silently.
+    const time_only = allow_popup_time_only && days === 0 && !end_date;
+    if (!end_date && !time_only) {
       results.push({ field: 'duration', success: false });
       return;
     }
-
-    const { hours, minutes: mins } = startTime;
-
-    // 終了時刻を計算（minutesは分数）
-    const startMinutes = hours * 60 + mins;
-    const endMinutes = startMinutes + minutes;
-    const endHours = Math.floor(endMinutes / 60) % 24;
-    const endMins = endMinutes % 60;
-
-    // 終了時刻を設定
-    const endTimeValue = `${String(endHours).padStart(2, '0')}:${String(
-      endMins
-    ).padStart(2, '0')}`;
-
-    console.log(`⏰ [Popup] Setting end time: ${endTimeValue} (duration: ${minutes} minutes)`);
-
-    // フォーカスを当ててから値を設定
-    endTimeElement.focus();
-    await delay(100);
-
-    // React対応の値設定
-    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      'value'
-    )?.set;
-
-    if (nativeInputValueSetter) {
-      nativeInputValueSetter.call(endTimeElement, endTimeValue);
-    } else {
-      endTimeElement.value = endTimeValue;
+    // Same-day durations do not need locale-specific date parsing.
+    const end_date_value = days === 0 ? start_date.value.trim() : advance_calendar_date(start_date.value, days);
+    if (!end_date_value) {
+      results.push({ field: 'duration', success: false });
+      return;
     }
+    const end_time_value = String(Math.floor(total_minutes / 60) % 24).padStart(2, '0') + ':' +
+      String(total_minutes % 60).padStart(2, '0');
 
-    // イベント発火
-    endTimeElement.dispatchEvent(new Event('input', { bubbles: true }));
-    endTimeElement.dispatchEvent(new Event('change', { bubbles: true }));
-
-    console.log(`⏰ [Popup] End time set to: ${endTimeElement.value}`);
-
-    // Enterキーを送信して視覚的な更新をトリガー
+    if (end_date && end_date.value !== end_date_value) {
+      if (!setFieldValue(end_date, end_date_value)) {
+        results.push({ field: 'duration', success: false });
+        return;
+      }
+      closeFieldDropdown(end_date);
+      await delay(100);
+    }
+    // Date commits can replace the time input. Reacquire it before writing.
+    const current_end_time = getElement<HTMLInputElement>(selectors.endTime);
+    if (!current_end_time || !setFieldValue(current_end_time, end_time_value)) {
+      results.push({ field: 'duration', success: false });
+      return;
+    }
     await delay(100);
-    endTimeElement.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'Enter',
-      code: 'Enter',
-      keyCode: 13,
-      bubbles: true,
+    current_end_time.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true,
     }));
-    console.log(`⏰ [Popup] Enter key sent`);
-
-    // 値の確定のため待機
+    // Escape resets Calendar's time field, so preserve the existing Enter-only commit.
     await delay(300);
-    console.log(`⏰ [Popup] End time after 300ms: ${endTimeElement.value}`);
-
-    results.push({ field: 'duration', success: true });
+    const confirmed_date = getElement<HTMLInputElement>(selectors.endDate);
+    const confirmed_time = getElement<HTMLInputElement>(selectors.endTime);
+    const parsed_end_time = confirmed_time && parseTime(confirmed_time.value);
+    const date_confirmed = time_only
+      ? !confirmed_date
+      : !!confirmed_date &&
+        (days === 0 ? confirmed_date.value.trim() : advance_calendar_date(confirmed_date.value, 0)) === end_date_value;
+    const success = date_confirmed && !!parsed_end_time &&
+      parsed_end_time.hours === Math.floor(total_minutes / 60) % 24 &&
+      parsed_end_time.minutes === total_minutes % 60;
+    results.push({ field: 'duration', success });
   } catch (error) {
-    console.error('Failed to set duration:', error);
+    console.error('❌ [Error] Failed to set duration:', error);
     results.push({ field: 'duration', success: false });
   }
 }
@@ -406,6 +306,8 @@ async function applyGuestPermissions(
     if (element) {
       const success = setFieldValue(element, permissions.canModify);
       results.push({ field: 'guestPermissions.canModify', success });
+    } else {
+      results.push({ field: 'guestPermissions.canModify', success: false });
     }
   }
 
@@ -414,6 +316,8 @@ async function applyGuestPermissions(
     if (element) {
       const success = setFieldValue(element, permissions.canInviteOthers);
       results.push({ field: 'guestPermissions.canInviteOthers', success });
+    } else {
+      results.push({ field: 'guestPermissions.canInviteOthers', success: false });
     }
   }
 
@@ -422,6 +326,8 @@ async function applyGuestPermissions(
     if (element) {
       const success = setFieldValue(element, permissions.seeGuestList);
       results.push({ field: 'guestPermissions.seeGuestList', success });
+    } else {
+      results.push({ field: 'guestPermissions.seeGuestList', success: false });
     }
   }
 }

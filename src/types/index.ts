@@ -37,3 +37,10 @@ export interface FieldSetResult {
   success: boolean;
   error?: string;
 }
+
+export interface DurationSelectors {
+  startDate: string;
+  startTime: string;
+  endDate: string;
+  endTime: string;
+}
