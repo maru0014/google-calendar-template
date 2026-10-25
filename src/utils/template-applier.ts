@@ -237,7 +237,9 @@ async function set_duration(
       return;
     }
     const total_minutes = parsed_time.hours * 60 + parsed_time.minutes + minutes;
-    const end_date_value = advance_calendar_date(start_date.value, Math.floor(total_minutes / 1440));
+    const days = Math.floor(total_minutes / 1440);
+    // Same-day durations do not need locale-specific date parsing.
+    const end_date_value = days === 0 ? start_date.value.trim() : advance_calendar_date(start_date.value, days);
     if (!end_date_value) {
       results.push({ field: 'duration', success: false });
       return;
@@ -269,7 +271,7 @@ async function set_duration(
     const confirmed_time = getElement<HTMLInputElement>(selectors.endTime);
     const parsed_end_time = confirmed_time && parseTime(confirmed_time.value);
     const success = !!confirmed_date && !!parsed_end_time &&
-      advance_calendar_date(confirmed_date.value, 0) === end_date_value &&
+      (days === 0 ? confirmed_date.value.trim() : advance_calendar_date(confirmed_date.value, 0)) === end_date_value &&
       parsed_end_time.hours === Math.floor(total_minutes / 60) % 24 &&
       parsed_end_time.minutes === total_minutes % 60;
     results.push({ field: 'duration', success });

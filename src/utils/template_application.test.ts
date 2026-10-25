@@ -93,6 +93,17 @@ describe.each(['popup', 'fullpage'] as const)('B07/B08: %s', (view_type) => {
     expect(fields[selectors.endDate].value).toBe(date);
     expect(fields[selectors.endTime].value).toBe('00:30');
   });
+  it('同日内の期間は未対応の日付書式も従来どおり扱う', async () => {
+    seed_dates('10/25/2026');
+    expect((await apply_duration(60)).success).toBe(true);
+    expect(fields[selectors.endDate].value).toBe('10/25/2026');
+    expect(fields[selectors.endTime].value).toBe('10:00');
+  });
+  it('同日内へ短縮する際は開始日の表示値を終了日にコピーする', async () => {
+    seed_dates('10/25/2026'); fields[selectors.endDate].value = '10/27/2026';
+    expect((await apply_duration(60)).success).toBe(true);
+    expect(fields[selectors.endDate].value).toBe('10/25/2026');
+  });
   it.each(['startDate', 'endDate', 'startTime', 'endTime'] as const)('日時要素欠落で失敗: %s', async (field) => {
     seed_dates(); delete fields[selectors[field]];
     expect((await apply_duration()).failedFields).toEqual(['duration']);
