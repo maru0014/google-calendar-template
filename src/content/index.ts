@@ -13,7 +13,7 @@ import {
   FULLPAGE_SELECTORS,
 } from '../constants/selectors';
 import { waitForElement } from '../utils/dom';
-import { loadTemplates } from '../utils/storage';
+import { loadTemplates, onStorageChange } from '../utils/storage';
 import { applyTemplate } from '../utils/template-applier';
 import type { Template } from '../types';
 
@@ -23,6 +23,16 @@ console.log('📅 [Calendar Templates] Content Script Loaded (after imports)');
  * 予定作成画面のタイプを判定
  */
 type EditorType = 'popup' | 'fullpage' | null;
+
+let templates_revision = 0;
+let latest_templates: Template[] = [];
+let refresh_template_options: ((templates: Template[]) => void) | undefined;
+
+async function load_current_templates(): Promise<Template[]> {
+  const revision = templates_revision;
+  const templates = await loadTemplates();
+  return revision === templates_revision ? templates : latest_templates;
+}
 
 function detectEditorType(): EditorType {
   // ポップアップウィンドウのチェック
@@ -180,19 +190,30 @@ function createTemplateSelector(templates: Template[], editorType: EditorType): 
   });
 
   // オプション
-  const defaultOption = document.createElement('option');
-  defaultOption.value = '';
-  defaultOption.textContent = templates.length === 0
-    ? 'テンプレートなし（拡張機能から作成）'
-    : 'テンプレートを選択...';
-  select.appendChild(defaultOption);
-
-  templates.forEach((template) => {
-    const option = document.createElement('option');
-    option.value = template.id;
-    option.textContent = template.name;
-    select.appendChild(option);
-  });
+  const update_options = (updated_templates: Template[]): void => {
+    const selected_id = select.value;
+    select.replaceChildren();
+    const default_option = document.createElement('option');
+    default_option.value = '';
+    default_option.textContent = updated_templates.length === 0
+      ? 'テンプレートなし（拡張機能から作成）'
+      : 'テンプレートを選択...';
+    select.appendChild(default_option);
+    for (const template of updated_templates) {
+      const option = document.createElement('option');
+      option.value = template.id;
+      option.textContent = template.name;
+      select.appendChild(option);
+    }
+    select.value = updated_templates.some((template) => template.id === selected_id)
+      ? selected_id : '';
+  };
+  update_options(templates);
+  refresh_template_options = (updated_templates) => {
+    if (document.getElementById('calendar-template-select') === select) {
+      update_options(updated_templates);
+    }
+  };
 
   // 変更イベント（イベント伝播を防止）
   select.addEventListener('change', async (e) => {
@@ -202,12 +223,14 @@ function createTemplateSelector(templates: Template[], editorType: EditorType): 
     const templateId = (e.target as HTMLSelectElement).value;
     if (!templateId) return;
 
-    const template = templates.find((t) => t.id === templateId);
-    if (!template) return;
-
-    console.log('📋 Applying template:', template.name);
-
     try {
+      // 保存直後の変更通知がまだ届いていなくても、古いデータは適用しない。
+      const current_templates = await load_current_templates();
+      update_options(current_templates);
+      const template = current_templates.find((t) => t.id === templateId);
+      if (!template) return;
+
+      console.log('📋 Applying template:', template.name);
       const result = await applyTemplate(template);
 
       if (result.success) {
@@ -264,7 +287,7 @@ async function injectTemplateSelector(editorType: EditorType): Promise<void> {
   }
 
   // テンプレートを読み込み
-  const templates = await loadTemplates();
+  const templates = await load_current_templates();
 
   // UI要素を作成
   const selector = createTemplateSelector(templates, editorType);
@@ -456,6 +479,13 @@ function init(): void {
   }
 
   console.log('🚀 [Calendar Templates] Initializing Calendar Templates extension...');
+
+  onStorageChange((changes) => {
+    if (!changes.templates) return;
+    templates_revision++;
+    latest_templates = changes.templates.newValue || [];
+    refresh_template_options?.(latest_templates);
+  });
 
   // 画面の監視を開始
   watchForEventEditors();
