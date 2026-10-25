@@ -7,7 +7,7 @@ permalink: /
 Googleカレンダーで予定を作成する際に、事前に保存したテンプレートを適用できるChrome拡張機能。
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Available-brightgreen)](https://chromewebstore.google.com/detail/gmgfladmnifefmoggfhgmdkdoelbmeec)
-[![Version](https://img.shields.io/badge/version-0.4.0-blue)](https://github.com/maru0014/google-calendar-template/releases)
+[![Version](https://img.shields.io/badge/version-0.4.2-blue)](https://github.com/maru0014/google-calendar-template/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ## 📦 インストール
