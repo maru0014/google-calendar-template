@@ -20,14 +20,30 @@ export type {
  */
 export type ViewType = 'popup' | 'fullpage' | 'unknown';
 
+export type LatestTask = (is_current: () => boolean) => Promise<void>;
+
 /**
  * テンプレート適用結果
  */
 export interface ApplyResult {
   success: boolean;
   failedFields?: string[];
+  field_errors?: FieldSetResult[];
   error?: string;
 }
+
+export interface ReminderItem {
+  method: 'notification' | 'email';
+  minutes: number;
+}
+
+export type RemindersConfig = { mode: 'none' } | {
+  mode: 'replace' | 'append'; items: ReminderItem[];
+};
+
+export type EventColorConfig = { mode: 'default' } | {
+  mode: 'explicit'; color_key: string;
+};
 
 /**
  * フィールド設定の結果

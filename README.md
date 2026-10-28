@@ -7,7 +7,7 @@ permalink: /
 Googleカレンダーで予定を作成する際に、事前に保存したテンプレートを適用できるChrome拡張機能。
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Available-brightgreen)](https://chromewebstore.google.com/detail/gmgfladmnifefmoggfhgmdkdoelbmeec)
-[![Version](https://img.shields.io/badge/version-0.4.2-blue)](https://github.com/maru0014/google-calendar-template/releases)
+[![Version](https://img.shields.io/badge/version-0.5.5-blue)](https://github.com/maru0014/google-calendar-template/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ## 📦 インストール
@@ -46,6 +46,12 @@ Googleカレンダーで予定を作成する際に、事前に保存したテ�
 - ✅ 開始・終了時刻、終日
 - ✅ ゲスト権限（編集・招待・リスト表示）
 - ✅ 登録先カレンダー（カレンダー名指定で自動切り替え）
+- ✅ 通知方式・タイミング（未指定／通知なし／既存を置換／重複しない追加）
+- ✅ 予定色（未指定／カレンダーの既定色／指定色）
+
+通知は詳細画面の時刻付き予定に対応し、最大5件まで設定できます。通知設定は初期1行で、「＋」で追加、「−」で削除できます。予定色と説明は小さい予定画面でも適用できます。旧テンプレートはそのまま使え、新しい設定はJSONインポート／エクスポートにも保持されます。
+
+設定方法と制限は[通知・予定色の設定](docs/TEMPLATE_SETTINGS.md)、今回の変更は[リリースノート](docs/RELEASE_NOTES_0.5.5.md)を参照してください。予定の最終保存は利用者が行います。
 
 ## 🎯 開発状況
 
@@ -81,6 +87,15 @@ npm run build
 ```
 
 ビルド後、`dist/`フォルダをChromeの拡張機能ページで読み込んでください。
+
+### 配布用ZIP
+
+```bash
+npm run zip
+```
+
+ビルド後、配布に必要な7ファイルだけを `google-calendar-template-v0.5.5.zip` に格納し、内容を照合します。既存のZIPは削除・上書きしません。同名ZIPがある場合はエラーで停止します。作成だけでは公開されません。
+ZIP作成にはWindows標準の `tar.exe`（ZIP対応のbsdtar）を使用します。
 
 ## プロジェクト構造
 

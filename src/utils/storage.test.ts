@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getTemplates, importData, saveTemplate, deleteTemplate } from './storage';
+import { getTemplates, importData, saveTemplate, deleteTemplate, exportData } from './storage';
 
 type Store = Record<string, unknown>;
 
@@ -35,6 +35,32 @@ beforeEach(() => {
 const seed = [
   { id: 'a', name: 'A', title: 'A', description: '', order: 0, createdAt: 1, updatedAt: 1 },
 ];
+
+describe('通知・色のJSON互換性', () => {
+  it('旧形式の既存項目と出力配列を維持する', async () => {
+    await importData(JSON.stringify(seed));
+    const [saved] = JSON.parse(await exportData());
+    expect(saved).toEqual(seed[0]);
+    expect(saved).not.toHaveProperty('reminders');
+    expect(saved).not.toHaveProperty('event_color');
+  });
+  it('新設定をJSON往復しても保持する', async () => {
+    const template = { ...seed[0], reminders: { mode: 'replace', items: [{ method: 'email', minutes: 60 }] }, event_color: { mode: 'explicit', color_key: '#4285F4' } };
+    await importData(JSON.stringify([template]));
+    const exported = await exportData();
+    store = {};
+    await importData(exported);
+    expect(JSON.parse(await exportData())).toEqual([template]);
+  });
+  it('後ろのレコードが不正でも既存データとバックアップを変更しない', async () => {
+    store.templates = seed;
+    store.templates_backups = [{ templates: seed, backedUpAt: 1 }];
+    const before = JSON.stringify(store);
+    await expect(importData(JSON.stringify([seed[0], { ...seed[0], reminders: null }]))).rejects.toThrow();
+    expect(set_calls).toBe(0);
+    expect(JSON.stringify(store)).toBe(before);
+  });
+});
 
 describe('B03: 読み込み失敗時に既存データを上書きしない', () => {
   it('getTemplates は読み込み失敗を空配列にせず例外を投げる', async () => {

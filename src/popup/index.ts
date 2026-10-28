@@ -5,6 +5,7 @@
 
 import { loadTemplates, saveTemplates, exportData, importData } from '../utils/storage';
 import type { Template } from '../types';
+import { load_settings_form, read_settings_form } from './template_settings_form';
 
 console.log('📋 Google Calendar Template - Popup Loaded');
 
@@ -174,6 +175,7 @@ function openCreateModal(): void {
   editingTemplateId = null;
   modalTitle.textContent = 'テンプレートを作成';
   templateForm.reset();
+  load_settings_form();
   showModal();
 }
 
@@ -181,6 +183,7 @@ function openCreateModal(): void {
  * モーダルを開く（編集）
  */
 function openEditModal(template: Template): void {
+  load_settings_form(template);
   editingTemplateId = template.id;
   modalTitle.textContent = 'テンプレートを編集';
 
@@ -230,7 +233,7 @@ function trapFocus(e: KeyboardEvent): void {
   if (e.key !== 'Tab' || !modal.classList.contains('show')) return;
 
   const focusable = modal.querySelectorAll<HTMLElement>(
-    'button, input, textarea, [tabindex]:not([tabindex="-1"])'
+    'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
   );
   const visible = Array.from(focusable).filter(
     (el) => !el.hasAttribute('disabled') && el.offsetParent !== null
@@ -254,6 +257,19 @@ function trapFocus(e: KeyboardEvent): void {
  */
 async function saveTemplate(e: Event): Promise<void> {
   e.preventDefault();
+  let settings: Pick<Template, 'reminders' | 'event_color'>;
+  try {
+    settings = read_settings_form();
+  } catch (error) {
+    console.error('❌ [Error] 通知・色設定が不正です', error);
+    const settings_error = document.getElementById('settings_error');
+    if (settings_error) {
+      settings_error.textContent = error instanceof Error ? error.message : '設定を確認してください';
+      settings_error.hidden = false;
+      settings_error.scrollIntoView({ block: 'nearest' });
+    }
+    return;
+  }
 
   const name = (document.getElementById('template-name') as HTMLInputElement).value.trim();
   const title = (document.getElementById('template-title') as HTMLInputElement).value.trim();
@@ -279,6 +295,7 @@ async function saveTemplate(e: Event): Promise<void> {
   const template: Template = {
     // フォームに無い項目（guestPermissions / visibility 等）を保持するため既存レコードを引き継ぐ
     ...existingTemplate,
+    ...settings,
     id: editingTemplateId || `template_${Date.now()}`,
     name,
     title,
@@ -295,6 +312,8 @@ async function saveTemplate(e: Event): Promise<void> {
     updatedAt: now,
   };
 
+  if (template.reminders === undefined) delete template.reminders;
+  if (template.event_color === undefined) delete template.event_color;
   if (editingTemplateId) {
     // 編集
     const index = templates.findIndex((t) => t.id === editingTemplateId);
