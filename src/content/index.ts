@@ -15,6 +15,7 @@ import {
 import { waitForElement } from '../utils/dom';
 import { loadTemplates, onStorageChange } from '../utils/storage';
 import { applyTemplate } from '../utils/template-applier';
+import { create_latest_task_runner } from '../utils/latest_task_runner';
 import type { Template } from '../types';
 
 console.log('📅 [Calendar Templates] Content Script Loaded (after imports)');
@@ -27,6 +28,8 @@ type EditorType = 'popup' | 'fullpage' | null;
 let templates_revision = 0;
 let latest_templates: Template[] = [];
 let refresh_template_options: ((templates: Template[]) => void) | undefined;
+// エディタの再挿入をまたいでも、メニューを操作する処理を重ねない。
+const schedule_template_selection = create_latest_task_runner();
 
 async function load_current_templates(): Promise<Template[]> {
   const revision = templates_revision;
@@ -191,6 +194,13 @@ function createTemplateSelector(templates: Template[], editorType: EditorType): 
 
   // オプション
   const update_options = (updated_templates: Template[]): void => {
+    const expected = [
+      { value: '', textContent: updated_templates.length === 0 ? 'テンプレートなし（拡張機能から作成）' : 'テンプレートを選択...' },
+      ...updated_templates.map((template) => ({ value: template.id, textContent: template.name })),
+    ];
+    const existing = Array.from(select.children) as HTMLOptionElement[];
+    if (existing.length === expected.length && existing.every((option, index) =>
+      option.value === expected[index].value && option.textContent === expected[index].textContent)) return;
     const selected_id = select.value;
     select.replaceChildren();
     const default_option = document.createElement('option');
@@ -221,45 +231,55 @@ function createTemplateSelector(templates: Template[], editorType: EditorType): 
     e.preventDefault();
 
     const templateId = (e.target as HTMLSelectElement).value;
-    if (!templateId) return;
+    await schedule_template_selection(async (is_latest) => {
+      const is_current = (): boolean => is_latest() && document.getElementById('calendar-template-select') === select;
+      if (!templateId || !is_current()) return;
 
-    try {
-      // 保存直後の変更通知がまだ届いていなくても、古いデータは適用しない。
-      const current_templates = await load_current_templates();
-      update_options(current_templates);
-      const template = current_templates.find((t) => t.id === templateId);
-      if (!template) return;
+      try {
+        // 保存直後の変更通知がまだ届いていなくても、古いデータは適用しない。
+        const current_templates = await load_current_templates();
+        if (!is_current()) return;
+        update_options(current_templates);
+        const template = current_templates.find((t) => t.id === templateId);
+        if (!template) return;
 
-      console.log('📋 Applying template:', template.name);
-      const result = await applyTemplate(template);
+        console.log('📋 Applying template:', template.name);
+        const result = await applyTemplate(template);
+        // 操作中に選択が変わった場合は古い通知を開かず、次の最新要求を処理する。
+        if (!is_current()) return;
 
-      if (result.success) {
-        console.log('✅ Template applied successfully');
-        // 選択を保持（リセットしない）
-        // setTimeout(() => {
-        //   select.value = '';
-        // }, 100);
-      } else {
-        const fieldLabels: Record<string, string> = {
-          title: 'タイトル',
-          description: '説明',
-          location: '場所',
-          calendarName: `登録先カレンダー「${template.calendarName || ''}」`,
-          duration: '期間（終了時間）',
-          allDay: '終日設定',
-        };
-        const friendlyNames = result.failedFields?.map((f) => {
-          // guest:xxx 形式のフィールド名を変換
-          if (f.startsWith('guest:')) return `ゲスト（${f.slice(6)}）`;
-          if (f.startsWith('guestPermissions.')) return 'ゲストの権限';
-          return fieldLabels[f] || f;
-        }) || ['不明'];
-        alert(`テンプレートの適用に一部失敗しました。\n対象: ${friendlyNames.join('、')}`);
+        if (result.success) {
+          console.log('✅ Template applied successfully');
+          // 選択を保持（リセットしない）
+          // setTimeout(() => {
+          //   select.value = '';
+          // }, 100);
+        } else {
+          const fieldLabels: Record<string, string> = {
+            title: 'タイトル',
+            description: '説明',
+            location: '場所',
+            calendarName: `登録先カレンダー「${template.calendarName || ''}」`,
+            duration: '期間（終了時間）',
+            allDay: '終日設定',
+            reminders: '通知設定',
+            event_color: '予定色',
+          };
+          const friendlyNames = result.failedFields?.map((f) => {
+            // guest:xxx 形式のフィールド名を変換
+            if (f.startsWith('guest:')) return `ゲスト（${f.slice(6)}）`;
+            if (f.startsWith('guestPermissions.')) return 'ゲストの権限';
+            return fieldLabels[f] || f;
+          }) || ['不明'];
+          const details = result.field_errors?.map((item) => item.error).filter(Boolean).join('\n') || result.error;
+          alert(`テンプレートの適用に一部失敗しました。\n対象: ${friendlyNames.join('、')}${details ? `\n${details}` : ''}`);
+        }
+      } catch (error) {
+        if (!is_current()) return;
+        console.error('❌ Error applying template:', error);
+        alert('テンプレートの適用中にエラーが発生しました。');
       }
-    } catch (error) {
-      console.error('❌ Error applying template:', error);
-      alert('テンプレートの適用中にエラーが発生しました。');
-    }
+    });
   });
 
   // フォーカスイベントもキャプチャ

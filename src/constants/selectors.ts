@@ -2,6 +2,31 @@
  * Googleカレンダーのセレクタ定義
  * Phase 0 調査結果より作成（検証済み）
  */
+export const SETTINGS_SELECTORS = {
+  root: '[role="main"]',
+  title: 'input[aria-label="タイトル"], input[aria-label="Title"]',
+  calendar: '[role="combobox"][aria-label="カレンダー"], [role="combobox"][aria-label="Calendar"]',
+  all_day: 'input[aria-label="終日"], input[aria-label="All day"]',
+  // 色を選ぶと先頭が「ローズ」等の選択色名に変わるため、操作名の末尾で特定する。
+  color_trigger: '[aria-label$="、予定の色"], [aria-label$=", event color"]',
+  color_options: '[role="menuitemradio"][data-color]',
+  color_default: '[role="menuitemradio"][aria-label="デフォルトの色"], [role="menuitemradio"][aria-label="Default color"]',
+  menu: '[role="menu"]',
+  notification_list: 'ul[aria-label="通知"], ul[aria-label="Notifications"]',
+  row: ':scope > li',
+  method: '[role="combobox"][aria-label="通知方法"], [role="combobox"][aria-label="Notification method"]',
+  unit: '[role="combobox"][aria-label="時間の選択単位"], [role="combobox"][aria-label="Time unit"]',
+  timing: 'input[type="number"]',
+  add: 'button[aria-label="通知を追加"], button[aria-label="Add notification"]',
+  remove: 'button[aria-label="通知を削除"], button[aria-label="Remove notification"]',
+  option: '[role="option"]',
+  selected_option: '[role="option"][aria-selected="true"]',
+  popup_title: 'input[aria-label="タイトルを追加"], input[aria-label="Add title"]',
+  popup_root: '[role="dialog"]',
+  expandable_button: 'button[aria-controls]',
+  description_key: '[data-key="description"]',
+  popup_description: '[contenteditable="true"][role="textbox"]',
+} as const;
 
 /**
  * ポップアップウィンドウのセレクタ
@@ -13,7 +38,7 @@ export const POPUP_SELECTORS = {
 
   // 入力フィールド（絶対セレクタ）
   title: "[role='dialog'] input[aria-label='タイトルを追加']",
-  description: "[role='dialog'] div[aria-label='説明を追加']",
+  description: '[role="dialog"] [contenteditable="true"][role="textbox"]',
   location: "[role='dialog'] input[aria-label='場所を追加']",
   guests: "[role='dialog'] input[aria-label='ゲスト']",
 

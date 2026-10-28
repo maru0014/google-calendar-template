@@ -8,11 +8,21 @@ import { replaceVariables } from './variables';
 import { setFieldValue, addGuest, detectCurrentView, getElement, closeFieldDropdown } from './dom';
 import { POPUP_SELECTORS, FULLPAGE_SELECTORS, CALENDAR_SELECTORS } from '../constants/selectors';
 import type { ApplyResult, FieldSetResult, DurationSelectors } from '../types';
+import { apply_event_settings } from './event_settings';
+import { apply_popup_description } from './popup_editor';
 
 /**
  * テンプレートを適用
  */
+let applying_template = false;
 export async function applyTemplate(template: Template): Promise<ApplyResult> {
+  if (applying_template) return { success: false, error: '別のテンプレートを適用中です。完了後に再試行してください' };
+  applying_template = true;
+  try { return await apply_template_internal(template); }
+  finally { applying_template = false; }
+}
+
+async function apply_template_internal(template: Template): Promise<ApplyResult> {
   const { isPopup, isFullPage } = detectCurrentView();
 
   if (!isPopup && !isFullPage) {
@@ -30,6 +40,7 @@ export async function applyTemplate(template: Template): Promise<ApplyResult> {
     } else if (isFullPage) {
       await applyToFullPage(template, results);
     }
+    await apply_event_settings(template, !isPopup && isFullPage, results);
 
     const failedFields = results
       .filter((r) => !r.success)
@@ -38,6 +49,7 @@ export async function applyTemplate(template: Template): Promise<ApplyResult> {
     return {
       success: failedFields.length === 0,
       failedFields: failedFields.length > 0 ? failedFields : undefined,
+      ...(results.some((result) => result.error) ? { field_errors: results.filter((result) => result.error) } : {}),
     };
   } catch (error) {
     console.error('Failed to apply template:', error);
@@ -65,7 +77,9 @@ async function applyToPopup(
 
   // 説明
   const descElement = getElement<HTMLElement>(POPUP_SELECTORS.description);
-  if (descElement || template.description) {
+  if (template.description) {
+    results.push(await apply_popup_description(replaceVariables(template.description)));
+  } else if (descElement && template.description !== undefined) {
     const description = replaceVariables(template.description);
     const success = !!descElement && setFieldValue(descElement, description);
     results.push({ field: 'description', success });

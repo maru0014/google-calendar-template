@@ -1,6 +1,6 @@
 # プライバシーポリシー / Privacy Policy
 
-**最終更新日 / Last Updated: 2025-10-25**
+**最終更新日 / Last Updated: 2026-10-28**
 
 ---
 
@@ -18,6 +18,7 @@ Google Calendar Template（以下「本拡張機能」）は、Googleカレン�
   - テンプレート名
   - イベントのタイトル、説明、場所、ゲスト
   - 期間、終日設定、ゲスト権限
+  - 登録先カレンダー名、通知方式・タイミング、予定色
   
 これらのデータは、Chrome の `chrome.storage.local` APIを使用して**お使いのデバイス内にのみ保存**されます。
 
@@ -90,6 +91,7 @@ The Extension stores the following information **locally**:
   - Template name
   - Event title, description, location, guests
   - Duration, all-day setting, guest permissions
+  - Target calendar name, reminder methods and timing, event color
 
 This data is stored **only on your device** using Chrome's `chrome.storage.local` API.
 

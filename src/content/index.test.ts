@@ -83,6 +83,29 @@ function publish(next: Template[]) {
 }
 
 describe.each(['popup', 'fullpage'] as const)('B09: %s の開いたエディタ', (view_type) => {
+  it('高速切替中はUI適用を重ねず、最後の選択だけ後続適用する', async () => {
+    templates = [{ ...seed }, { ...seed, id: 'b', name: 'B' }, { ...seed, id: 'c', name: 'C' }];
+    await open_editor(view_type);
+    let finish!: (result: { success: boolean }) => void;
+    vi.mocked(applyTemplate).mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }));
+    const first = choose('a');
+    // storage読み込みとキュー開始のmicrotaskを進め、UI適用中に次の選択を行う。
+    for (let i = 0; i < 10 && !finish; i++) await Promise.resolve();
+    expect(applyTemplate).toHaveBeenCalledTimes(1);
+    const middle = choose('b'); const last = choose('c');
+    expect(applyTemplate).toHaveBeenCalledTimes(1);
+    finish({ success: false });
+    await Promise.all([first, middle, last]);
+    expect(vi.mocked(applyTemplate).mock.calls.map(([template]) => template.id)).toEqual(['a', 'c']);
+    expect(alert).not.toHaveBeenCalled();
+  });
+  it('内容が変わらないとき選択肢DOMを作り直さない', async () => {
+    await open_editor(view_type);
+    const options = [...selector().children];
+    await choose('a');
+    expect(selector().children).toEqual(options);
+    expect(selector().children[1]).toBe(options[1]);
+  });
   it('追加・編集・並べ替えを反映し、存続する選択IDを保つ', async () => {
     await open_editor(view_type); selector().value = 'a';
     publish([{ ...seed, id: 'b', name: 'Added' }, { ...seed, name: 'Edited', title: 'New title' }]);

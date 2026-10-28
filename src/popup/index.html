@@ -588,6 +588,20 @@
     .modal-foot button.save:hover {
       background: var(--primary-hover);
     }
+    #template_settings { display: grid; gap: 12px; margin: 20px 0 0; padding: 16px; border: 1px solid var(--border); border-radius: 10px; }
+    #template_settings legend { font-weight: 600; }
+    #template_settings p { font-size: 12px; line-height: 1.7; margin: 0; }
+    #template_settings label { display: grid; gap: 6px; font-size: 13px; }
+    #template_settings select, #template_settings input { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #777; border-radius: 6px; color: inherit; background: var(--surface, #25272a); font: inherit; }
+    #template_settings select:focus-visible, #template_settings input:focus-visible { outline: 2px solid #8ab4f8; outline-offset: 2px; }
+    #template_settings :disabled { opacity: .5; }
+    #template_settings [hidden] { display: none !important; }
+    #template_settings .reminder_rows { display: grid; gap: 8px; }
+    #template_settings .reminder_rows:empty { display: none; }
+    #template_settings .reminder_row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 32px; gap: 8px; align-items: end; }
+    #template_settings button { border: 1px solid var(--border); border-radius: 6px; background: var(--field); color: var(--text); padding: 8px; cursor: pointer; font: inherit; }
+    #template_settings button:focus-visible { outline: 2px solid #8ab4f8; outline-offset: 2px; }
+    #template_settings #add_reminder { justify-self: start; font-size: 12px; }
   </style>
 </head>
 <body>
@@ -693,8 +707,12 @@
               </label>
             </div>
           </div>
+        <fieldset id="template_settings">
+          <legend>通知・予定色</legend>
+          <details><summary>対応範囲・使い方</summary><p>通知は詳細画面の時刻付き予定に対応（最大5件・0〜40320分前）。予定色は小さい予定画面でも適用できます。予定の保存はご自身で行ってください。</p></details>
+          <p id="settings_error" role="alert" hidden></p>
+        </fieldset>
         </div>
-
         <div class="modal-foot">
           <button type="button" class="cancel" id="cancel-btn">キャンセル</button>
           <button type="submit" class="save">保存</button>

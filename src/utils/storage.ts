@@ -6,6 +6,9 @@
 /**
  * テンプレートのデータ構造
  */
+import type { RemindersConfig, EventColorConfig } from '../types';
+import { parse_reminders, parse_event_color } from './template_settings';
+
 export interface Template {
   id: string;
   name: string;
@@ -22,6 +25,8 @@ export interface Template {
     seeGuestList?: boolean;
   };
   calendarName?: string; // 登録先カレンダー名
+  reminders?: RemindersConfig;
+  event_color?: EventColorConfig;
   order: number; // 並び順
   createdAt: number;
   updatedAt: number;
@@ -277,29 +282,6 @@ export async function importData(jsonString: string): Promise<boolean> {
 
     const now = Date.now();
     const existing = await getTemplates();
-    // サイレントバックアップ（ダウンロードしない）
-    try {
-      // 互換: 単一バックアップを維持
-      await chrome.storage.local.set({
-        [STORAGE_KEYS.BACKUP_TEMPLATES]: {
-          templates: existing,
-          backedUpAt: now,
-        },
-      });
-      // 新: 直近3件のローテーション
-      const historyGet = await chrome.storage.local.get(
-        STORAGE_KEYS.BACKUP_TEMPLATES_HISTORY
-      );
-      const history: { templates: Template[]; backedUpAt: number }[] =
-        historyGet[STORAGE_KEYS.BACKUP_TEMPLATES_HISTORY] || [];
-      history.push({ templates: existing, backedUpAt: now });
-      const rotated = history.slice(-3);
-      await chrome.storage.local.set({
-        [STORAGE_KEYS.BACKUP_TEMPLATES_HISTORY]: rotated,
-      });
-    } catch (e) {
-      console.warn('Failed to save silent backup:', e);
-    }
     const existingIds = new Set(existing.map((t) => t.id));
 
     const normalized: Template[] = parsed.map((item: any, idx: number) => {
@@ -350,12 +332,37 @@ export async function importData(jsonString: string): Promise<boolean> {
             }
           : undefined,
         calendarName,
+        reminders: parse_reminders(item?.reminders),
+        event_color: parse_event_color(item?.event_color),
         order: idx,
         createdAt,
         updatedAt,
       } as Template;
     });
 
+    // サイレントバックアップ（ダウンロードしない）
+    try {
+      // 互換: 単一バックアップを維持
+      await chrome.storage.local.set({
+        [STORAGE_KEYS.BACKUP_TEMPLATES]: {
+          templates: existing,
+          backedUpAt: now,
+        },
+      });
+      // 新: 直近3件のローテーション
+      const historyGet = await chrome.storage.local.get(
+        STORAGE_KEYS.BACKUP_TEMPLATES_HISTORY
+      );
+      const history: { templates: Template[]; backedUpAt: number }[] =
+        historyGet[STORAGE_KEYS.BACKUP_TEMPLATES_HISTORY] || [];
+      history.push({ templates: existing, backedUpAt: now });
+      const rotated = history.slice(-3);
+      await chrome.storage.local.set({
+        [STORAGE_KEYS.BACKUP_TEMPLATES_HISTORY]: rotated,
+      });
+    } catch (e) {
+      console.warn('Failed to save silent backup:', e);
+    }
     // マージ（既存 + インポート）し、orderを振り直し
     // updatedAt は既存は維持、新規/インポート元が未設定なら now
     const mergedSource: Template[] = [...existing, ...normalized];
